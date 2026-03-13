@@ -37,3 +37,8 @@ __screenshots__/
 
 # Vite
 *.timestamp-*-*.mjs
+
+# Environment variables (never commit API keys)
+.env
+.env.local
+.env.production

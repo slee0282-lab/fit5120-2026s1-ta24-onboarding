@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: sunsafe-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: OPENWEATHER_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sunsafe-db
+          property: connectionString
+    autoDeploy: true
+
+databases:
+  - name: sunsafe-db
+    plan: free
+    databaseName: sunsafe
+    postgresMajorVersion: 16

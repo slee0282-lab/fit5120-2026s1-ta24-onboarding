@@ -10,6 +10,7 @@ export default defineConfig({
     vue(),
     vueDevTools(),
   ],
+  base: '/fit5120-2026s1-ta24-onboarding/',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
