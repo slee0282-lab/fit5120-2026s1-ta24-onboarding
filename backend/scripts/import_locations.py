@@ -2,21 +2,30 @@
 Import Australian location data (suburb, state, postcode, lat, lon) into PostgreSQL.
 
 Source: https://gist.github.com/randomecho/5020859 (GNU GPL v3.0)
+Format: MySQL SQL dump — parses INSERT statements
 
 Usage:
     export DATABASE_URL=postgresql://localhost/sunsafe
-    python scripts/import_locations.py <path_to_csv>
+    python scripts/import_locations.py [path_to_sql_file]
 
-If no CSV path is given, it downloads the file from the gist.
+If no file path is given, the script downloads directly from the gist.
 """
-import csv
 import os
+import re
 import sys
-import io
 import urllib.request
 import psycopg2
+from typing import List, Optional, Tuple
 
-CSV_URL = "https://gist.githubusercontent.com/randomecho/5020859/raw/australian_postcodes.csv"
+SQL_URL = (
+    "https://gist.githubusercontent.com/randomecho/5020859/raw/"
+    "843209f5bfa91a2881810e1ed0e9d52f67a30497/australian-postcodes.sql"
+)
+
+# Matches: ('postcode', 'suburb', 'STATE', lat, lon)
+ROW_RE = re.compile(
+    r"\('([^']+)',\s*'([^']+)',\s*'([^']+)',\s*(-?\d+\.?\d*),\s*(-?\d+\.?\d*)\)"
+)
 
 CREATE_TABLE = """
 CREATE TABLE IF NOT EXISTS locations (
@@ -37,39 +46,26 @@ VALUES (%s, %s, %s, %s, %s)
 """
 
 
-def load_csv(path: str | None) -> list[tuple]:
+def load_sql(path: Optional[str]) -> List[Tuple]:
     if path:
-        with open(path, newline="", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            rows = list(reader)
+        with open(path, encoding="utf-8") as f:
+            content = f.read()
     else:
-        print("Downloading CSV from gist...")
-        with urllib.request.urlopen(CSV_URL) as resp:
+        print("Downloading SQL from gist...")
+        with urllib.request.urlopen(SQL_URL) as resp:
             content = resp.read().decode("utf-8")
-        reader = csv.DictReader(io.StringIO(content))
-        rows = list(reader)
 
     records = []
-    for row in rows:
-        try:
-            lat = float(row["lat"])
-            lon = float(row["lon"] if "lon" in row else row["long"])
-        except (ValueError, KeyError):
-            continue
-        records.append((
-            row.get("suburb", row.get("place_name", "")).strip(),
-            row.get("state", "").strip(),
-            row.get("postcode", "").strip(),
-            lat,
-            lon,
-        ))
+    for match in ROW_RE.finditer(content):
+        postcode, suburb, state, lat, lon = match.groups()
+        records.append((suburb.strip(), state.strip(), postcode.strip(), float(lat), float(lon)))
     return records
 
 
 def main():
-    csv_path = sys.argv[1] if len(sys.argv) > 1 else None
-    records = load_csv(csv_path)
-    print(f"Loaded {len(records)} records")
+    sql_path = sys.argv[1] if len(sys.argv) > 1 else None
+    records = load_sql(sql_path)
+    print(f"Parsed {len(records)} records")
 
     db_url = os.environ["DATABASE_URL"]
     conn = psycopg2.connect(db_url)

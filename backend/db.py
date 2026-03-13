@@ -1,4 +1,5 @@
 import os
+from typing import Optional, Dict, Any
 import psycopg2
 import psycopg2.extras
 
