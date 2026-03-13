@@ -38,6 +38,11 @@ def get_uv():
     })
 
 
+@app.route("/")
+def index():
+    return jsonify({"service": "SunSafe Victoria API", "status": "ok"})
+
+
 @app.route("/health")
 def health():
     return jsonify({"status": "ok"})
