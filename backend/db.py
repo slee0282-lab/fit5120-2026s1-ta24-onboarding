@@ -8,7 +8,7 @@ def get_connection():
     return psycopg2.connect(os.environ["DATABASE_URL"])
 
 
-def lookup_location(query: str) -> dict | None:
+def lookup_location(query: str) -> Optional[Dict[str, Any]]:
     """
     Look up a location by postcode or suburb name.
     Returns a dict with keys: suburb, state, postcode, lat, lon
