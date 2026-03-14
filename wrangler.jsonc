@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "fit5120-2026s1-ta24-onboarding",
+  "compatibility_date": "2025-09-27",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "onboarding-victoria-sunsafe"
+  },
+  "compatibility_flags": [
+    "nodejs_compat"
+  ]
+}
