@@ -392,7 +392,7 @@ watch(() => store.locationName, () => {
 /* ── SVG body diagram ── */
 .body-diagram {
   width: 100%;
-  max-width: 320px;
+  max-width: 180px;
   height: auto;
 }
 
