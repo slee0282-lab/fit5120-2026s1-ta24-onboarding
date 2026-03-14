@@ -56,11 +56,10 @@ const spf = computed(() => (uvIndex.value !== null ? spfRecommendation(uvIndex.v
 
 // --- Interactive body parts ---
 const BODY_PARTS = [
-  { id: 'face',       label: 'Face, head and neck' },
+  { id: 'face',      label: 'Face, head and neck' },
   { id: 'left-arm',  label: 'Left arm' },
   { id: 'right-arm', label: 'Right arm' },
-  { id: 'body-front', label: 'Body front' },
-  { id: 'body-back',  label: 'Body back' },
+  { id: 'body',      label: 'Body' },
   { id: 'left-leg',  label: 'Left leg' },
   { id: 'right-leg', label: 'Right leg' },
 ]
@@ -169,13 +168,11 @@ watch(() => store.locationName, () => {
                   <!-- SVG body diagram -->
                   <div class="d-flex justify-content-center mb-3">
                     <svg
-                      viewBox="0 0 280 192"
+                      viewBox="0 0 140 192"
                       class="body-diagram"
                       role="img"
                       aria-label="Body diagram — tap zones to mark sunscreen applied"
                     >
-                      <!-- ══ FRONT FIGURE (centre x=70) ══ -->
-
                       <!-- Face, head and neck -->
                       <g
                         class="body-zone"
@@ -192,19 +189,19 @@ watch(() => store.locationName, () => {
                         <text v-if="appliedParts.has('face')" x="70" y="25" text-anchor="middle" class="check-text">✓</text>
                       </g>
 
-                      <!-- Body front (torso) -->
+                      <!-- Body (torso) -->
                       <g
                         class="body-zone"
-                        :class="{ 'body-zone--applied': appliedParts.has('body-front') }"
-                        @click="togglePart('body-front')"
+                        :class="{ 'body-zone--applied': appliedParts.has('body') }"
+                        @click="togglePart('body')"
                         role="button"
                         tabindex="0"
-                        aria-label="Body front"
-                        @keydown.enter="togglePart('body-front')"
+                        aria-label="Body"
+                        @keydown.enter="togglePart('body')"
                       >
-                        <title>Body front</title>
+                        <title>Body</title>
                         <rect x="38" y="44" width="64" height="54" rx="5" />
-                        <text v-if="appliedParts.has('body-front')" x="70" y="73" text-anchor="middle" class="check-text check-text--lg">✓</text>
+                        <text v-if="appliedParts.has('body')" x="70" y="73" text-anchor="middle" class="check-text check-text--lg">✓</text>
                       </g>
 
                       <!-- Left arm (user's left = viewer's right) -->
@@ -268,47 +265,6 @@ watch(() => store.locationName, () => {
                         <rect x="40" y="98" width="28" height="78" rx="8" />
                         <text v-if="appliedParts.has('right-leg')" x="54" y="140" text-anchor="middle" class="check-text">✓</text>
                       </g>
-
-                      <!-- Front label -->
-                      <text x="70" y="188" text-anchor="middle" class="figure-label">Front</text>
-
-                      <!-- ══ BACK FIGURE (centre x=210, offset +140) ══ -->
-
-                      <!-- Head — non-interactive (covered by front figure) -->
-                      <g class="body-zone body-zone--inactive">
-                        <circle cx="210" cy="20" r="16" />
-                        <rect x="203" y="35" width="14" height="9" rx="2" />
-                      </g>
-
-                      <!-- Body back — interactive -->
-                      <g
-                        class="body-zone"
-                        :class="{ 'body-zone--applied': appliedParts.has('body-back') }"
-                        @click="togglePart('body-back')"
-                        role="button"
-                        tabindex="0"
-                        aria-label="Body back"
-                        @keydown.enter="togglePart('body-back')"
-                      >
-                        <title>Body back</title>
-                        <rect x="178" y="44" width="64" height="54" rx="5" />
-                        <text v-if="appliedParts.has('body-back')" x="210" y="73" text-anchor="middle" class="check-text check-text--lg">✓</text>
-                      </g>
-
-                      <!-- Arms (back) — non-interactive -->
-                      <g class="body-zone body-zone--inactive">
-                        <rect x="243" y="44" width="20" height="54" rx="8" />
-                        <rect x="157" y="44" width="20" height="54" rx="8" />
-                      </g>
-
-                      <!-- Legs (back) — non-interactive -->
-                      <g class="body-zone body-zone--inactive">
-                        <rect x="212" y="98" width="28" height="78" rx="8" />
-                        <rect x="180" y="98" width="28" height="78" rx="8" />
-                      </g>
-
-                      <!-- Back label -->
-                      <text x="210" y="188" text-anchor="middle" class="figure-label">Back</text>
                     </svg>
                   </div>
 
@@ -334,7 +290,7 @@ watch(() => store.locationName, () => {
                     <li class="checklist-row checklist-row--total">
                       <span class="checklist-icon"></span>
                       <span class="fw-semibold">Total for full body</span>
-                      <span class="ms-auto small fw-semibold">~7 tsp / 35 ml</span>
+                      <span class="ms-auto small fw-semibold">~6 tsp / 30 ml</span>
                     </li>
                   </ul>
 
