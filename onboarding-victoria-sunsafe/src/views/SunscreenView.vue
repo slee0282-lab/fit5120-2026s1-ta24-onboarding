@@ -301,8 +301,11 @@ watch(() => store.locationName, () => {
                 </div>
               </div>
               <p class="text-muted mt-2" style="font-size: 11px">
-                Source: Cancer Council Australia — 1 teaspoon (5 ml) per body part;
-                apply 20 minutes before exposure and reapply every 2 hours
+                © Cancer Council Australia. All rights reserved.
+                "The average adult needs about 35 mL (around 7 teaspoons) for full-body coverage –
+                at least one teaspoon each for your arms, legs, front, back, face/neck/ears."
+                Reproduced for non-commercial educational purposes.
+                <a href="https://www.cancer.org.au/cancer-information/causes-and-prevention/sun-safety/sunscreen/advice" target="_blank" rel="noopener">cancer.org.au</a>
               </p>
             </div>
 
@@ -333,8 +336,11 @@ watch(() => store.locationName, () => {
                 </ul>
               </div>
               <p v-if="spf" class="text-muted mb-4" style="font-size: 11px">
-                Source: Cancer Council Australia — SunSmart sun protection guidelines ·
-                SPF adjusted for skin type based on Sánchez-Pérez et al. (2019), <em>Sci Rep</em> 9, 733
+                © Cancer Council Australia. All rights reserved.
+                SPF guidance sourced from Cancer Council Australia's SunSmart sun protection guidelines,
+                reproduced for non-commercial educational purposes.
+                <a href="https://www.cancer.org.au" target="_blank" rel="noopener">cancer.org.au</a>
+                · Safe exposure time: Sánchez-Pérez et al. (2019), <em>Sci Rep</em> 9, 733
               </p>
 
               <!-- Additional protection warning -->
