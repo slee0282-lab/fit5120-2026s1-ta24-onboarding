@@ -1,58 +1,109 @@
 <script setup lang="ts">
 import { ref, onUnmounted } from 'vue'
-import LocationInput from '../components/LocationInput.vue'
+import { RouterLink } from 'vue-router'
 import UVCircle from '../components/UVCircle.vue'
 import AlertBanner from '../components/AlertBanner.vue'
+import { useLocationStore } from '../stores/location'
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:5000'
+const store = useLocationStore()
 
 const uvIndex = ref<number | null>(null)
 const locationName = ref<string | null>(null)
+const fetchedAt = ref<string | null>(null)
 const errorMessage = ref<string | null>(null)
 const loading = ref(false)
-const lastQuery = ref<string | null>(null)
+const textQuery = ref('')
+const selectedCity = ref('')
+
+const VICTORIA_CITIES = [
+  { label: 'Melbourne', lat: -37.8136, lon: 144.9631 },
+  { label: 'Geelong', lat: -38.1499, lon: 144.3617 },
+  { label: 'Ballarat', lat: -37.5622, lon: 143.8503 },
+  { label: 'Bendigo', lat: -36.7570, lon: 144.2794 },
+  { label: 'Shepparton', lat: -36.3832, lon: 145.3990 },
+  { label: 'Mildura', lat: -34.2086, lon: 142.1312 },
+  { label: 'Wodonga', lat: -36.1218, lon: 146.8880 },
+  { label: 'Warrnambool', lat: -38.3830, lon: 142.4879 },
+  { label: 'Horsham', lat: -36.7118, lon: 142.1991 },
+  { label: 'Traralgon', lat: -38.1958, lon: 146.5428 },
+  { label: 'Wangaratta', lat: -36.3579, lon: 146.3134 },
+  { label: 'Sale', lat: -38.1072, lon: 147.0663 },
+  { label: 'Bairnsdale', lat: -37.8277, lon: 147.6093 },
+  { label: 'Echuca', lat: -36.1438, lon: 144.7513 },
+  { label: 'Swan Hill', lat: -35.3378, lon: 143.5552 },
+]
 
 let refreshTimer: ReturnType<typeof setInterval> | null = null
 
-async function fetchUV(query: string) {
+function startRefresh(fn: () => void) {
+  if (refreshTimer !== null) clearInterval(refreshTimer)
+  refreshTimer = setInterval(fn, 60 * 60 * 1000)
+}
+
+function applyResult(data: { uv_index: number; location: string }, storeQuery: string) {
+  uvIndex.value = data.uv_index
+  locationName.value = data.location
+  fetchedAt.value = new Date().toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })
+  store.setLocation(storeQuery, data.uv_index, data.location)
+}
+
+function clearResult() {
+  uvIndex.value = null
+  locationName.value = null
+  fetchedAt.value = null
+  store.clear()
+}
+
+async function fetchUVByQuery(query: string) {
   loading.value = true
   errorMessage.value = null
-
   try {
-    const params = new URLSearchParams({ q: query })
-    const res = await fetch(`${API_BASE}/api/uv?${params}`)
+    const res = await fetch(`/api/uv?${new URLSearchParams({ q: query })}`)
     const data = await res.json()
-
     if (!res.ok) {
       errorMessage.value = data.error ?? 'Something went wrong. Please try again.'
-      uvIndex.value = null
-      locationName.value = null
+      clearResult()
       return
     }
-
-    uvIndex.value = data.uv_index
-    locationName.value = data.location
+    applyResult(data, query)
+    startRefresh(() => fetchUVByQuery(query))
   } catch {
     errorMessage.value = 'UV data is currently unavailable. Please try again later.'
-    uvIndex.value = null
-    locationName.value = null
+    clearResult()
   } finally {
     loading.value = false
   }
 }
 
-function handleSearch(query: string) {
-  lastQuery.value = query
-
-  if (refreshTimer !== null) {
-    clearInterval(refreshTimer)
+async function fetchUVByCoords(lat: number, lon: number, name: string) {
+  loading.value = true
+  errorMessage.value = null
+  try {
+    const res = await fetch(`/api/uv?${new URLSearchParams({ lat: String(lat), lon: String(lon) })}`)
+    const data = await res.json()
+    if (!res.ok) {
+      errorMessage.value = data.error ?? 'Something went wrong. Please try again.'
+      clearResult()
+      return
+    }
+    applyResult({ uv_index: data.uv_index, location: name }, name)
+    startRefresh(() => fetchUVByCoords(lat, lon, name))
+  } catch {
+    errorMessage.value = 'UV data is currently unavailable. Please try again later.'
+    clearResult()
+  } finally {
+    loading.value = false
   }
+}
 
-  fetchUV(query)
+function handleCitySelect() {
+  const city = VICTORIA_CITIES.find((c) => c.label === selectedCity.value)
+  if (city) fetchUVByCoords(city.lat, city.lon, `${city.label}, VIC`)
+}
 
-  refreshTimer = setInterval(() => {
-    if (lastQuery.value) fetchUV(lastQuery.value)
-  }, 60 * 60 * 1000)
+function handleTextSearch() {
+  const trimmed = textQuery.value.trim()
+  if (trimmed) fetchUVByQuery(trimmed)
 }
 
 onUnmounted(() => {
@@ -69,22 +120,60 @@ onUnmounted(() => {
           Check the current UV level for any Victorian suburb or postcode.
         </p>
 
-        <LocationInput @search="handleSearch" />
+        <!-- Location input options -->
+        <div class="card mb-4">
+          <!-- City dropdown -->
+          <div class="card-body border-bottom d-flex align-items-center justify-content-between gap-3 flex-wrap">
+            <div class="fw-semibold">Select a city</div>
+            <select
+              v-model="selectedCity"
+              class="form-select"
+              style="max-width: 200px"
+              @change="handleCitySelect"
+              :disabled="loading"
+            >
+              <option value="" disabled>Choose city…</option>
+              <option v-for="city in VICTORIA_CITIES" :key="city.label" :value="city.label">
+                {{ city.label }}
+              </option>
+            </select>
+          </div>
 
-        <div v-if="loading" class="text-center my-4">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
+          <!-- Text input -->
+          <div class="card-body">
+            <div class="fw-semibold mb-2">Or type suburb / postcode</div>
+            <form class="d-flex gap-2" @submit.prevent="handleTextSearch">
+              <input
+                v-model="textQuery"
+                type="text"
+                class="form-control"
+                placeholder="e.g. 3000 or Melbourne"
+                maxlength="100"
+                aria-label="Suburb or postcode"
+                :disabled="loading"
+              />
+              <button type="submit" class="btn btn-primary text-nowrap" :disabled="loading">
+                Check UV
+              </button>
+            </form>
           </div>
         </div>
 
-        <div v-else class="mt-4">
+        <!-- Loading spinner -->
+        <div v-if="loading" class="text-center my-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading…</span>
+          </div>
+        </div>
+
+        <div v-else class="mt-2">
           <div v-if="errorMessage" class="alert alert-danger" role="alert">
             {{ errorMessage }}
           </div>
 
           <template v-else-if="uvIndex !== null">
             <p v-if="locationName" class="text-center text-muted mb-3">
-              {{ locationName }}
+              {{ locationName }}<span v-if="fetchedAt"> · as of {{ fetchedAt }}</span>
             </p>
 
             <div class="d-flex justify-content-center mb-4">
@@ -93,7 +182,7 @@ onUnmounted(() => {
 
             <AlertBanner :uv-index="uvIndex" />
 
-            <div class="mt-3">
+            <div class="mt-3 mb-4">
               <h6 class="text-muted">UV Categories</h6>
               <div class="d-flex gap-2 flex-wrap">
                 <span class="badge" style="background-color: #4caf50">Low (0–2)</span>
@@ -102,6 +191,12 @@ onUnmounted(() => {
                 <span class="badge" style="background-color: #f44336">Very High (8–10)</span>
                 <span class="badge" style="background-color: #9c27b0">Extreme (11+)</span>
               </div>
+            </div>
+
+            <div class="d-grid">
+              <RouterLink to="/sunscreen" class="btn btn-success">
+                View Sunscreen Guide →
+              </RouterLink>
             </div>
           </template>
 

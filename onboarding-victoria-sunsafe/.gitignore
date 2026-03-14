@@ -42,3 +42,6 @@ __screenshots__/
 .env
 .env.local
 .env.production
+
+# Wrangler local secrets
+.dev.vars

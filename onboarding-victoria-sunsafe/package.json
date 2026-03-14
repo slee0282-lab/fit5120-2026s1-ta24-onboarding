@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "run-p dev:vite dev:worker",
+    "dev:vite": "vite --port 5173",
+    "dev:worker": "wrangler pages dev --port 8788",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
@@ -37,7 +39,8 @@
     "typescript": "~5.9.3",
     "vite": "^7.3.1",
     "vite-plugin-vue-devtools": "^8.0.6",
-    "vue-tsc": "^3.2.5"
+    "vue-tsc": "^3.2.5",
+    "wrangler": "^4.73.0"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
