@@ -56,12 +56,13 @@ const spf = computed(() => (uvIndex.value !== null ? spfRecommendation(uvIndex.v
 
 // --- Interactive body parts ---
 const BODY_PARTS = [
-  { id: 'face',      label: 'Face, head and neck' },
-  { id: 'left-arm',  label: 'Left arm' },
-  { id: 'right-arm', label: 'Right arm' },
-  { id: 'body',      label: 'Body' },
-  { id: 'left-leg',  label: 'Left leg' },
-  { id: 'right-leg', label: 'Right leg' },
+  { id: 'face',        label: 'Face, head and neck' },
+  { id: 'left-arm',   label: 'Left arm' },
+  { id: 'right-arm',  label: 'Right arm' },
+  { id: 'body-front', label: 'Body (front)' },
+  { id: 'body-back',  label: 'Body (back)' },
+  { id: 'left-leg',   label: 'Left leg' },
+  { id: 'right-leg',  label: 'Right leg' },
 ]
 
 const appliedParts = ref<Set<string>>(new Set())
@@ -142,7 +143,7 @@ watch(() => store.locationName, () => {
 
             <!-- LEFT: Body diagram card -->
             <div class="col-12 col-lg-6">
-              <div class="card h-100">
+              <div class="card">
                 <div class="card-header d-flex align-items-center justify-content-between">
                   <span class="fw-semibold">How much sunscreen to apply</span>
                   <button class="btn btn-sm btn-outline-secondary" @click="resetParts">Reset</button>
@@ -189,22 +190,39 @@ watch(() => store.locationName, () => {
                         <text v-if="appliedParts.has('face')" x="70" y="25" text-anchor="middle" class="check-text">✓</text>
                       </g>
 
-                      <!-- Body (torso) -->
+                      <!-- Body front (top half of torso) -->
                       <g
                         class="body-zone"
-                        :class="{ 'body-zone--applied': appliedParts.has('body') }"
-                        @click="togglePart('body')"
+                        :class="{ 'body-zone--applied': appliedParts.has('body-front') }"
+                        @click="togglePart('body-front')"
                         role="button"
                         tabindex="0"
-                        aria-label="Body"
-                        @keydown.enter="togglePart('body')"
+                        aria-label="Body front"
+                        @keydown.enter="togglePart('body-front')"
                       >
-                        <title>Body</title>
-                        <rect x="38" y="44" width="64" height="54" rx="5" />
-                        <text v-if="appliedParts.has('body')" x="70" y="73" text-anchor="middle" class="check-text check-text--lg">✓</text>
+                        <title>Body (front)</title>
+                        <rect x="38" y="44" width="64" height="26" rx="5" />
+                        <text x="70" y="58" text-anchor="middle" class="arm-label" :class="{ 'arm-label--hidden': appliedParts.has('body-front') }">Front</text>
+                        <text v-if="appliedParts.has('body-front')" x="70" y="62" text-anchor="middle" class="check-text">✓</text>
                       </g>
 
-                      <!-- Left arm (user's left = viewer's right) -->
+                      <!-- Body back (bottom half of torso) -->
+                      <g
+                        class="body-zone"
+                        :class="{ 'body-zone--applied': appliedParts.has('body-back') }"
+                        @click="togglePart('body-back')"
+                        role="button"
+                        tabindex="0"
+                        aria-label="Body back"
+                        @keydown.enter="togglePart('body-back')"
+                      >
+                        <title>Body (back)</title>
+                        <rect x="38" y="71" width="64" height="27" rx="5" />
+                        <text x="70" y="87" text-anchor="middle" class="arm-label" :class="{ 'arm-label--hidden': appliedParts.has('body-back') }">Back</text>
+                        <text v-if="appliedParts.has('body-back')" x="70" y="87" text-anchor="middle" class="check-text">✓</text>
+                      </g>
+
+                      <!-- Left arm (viewer's left) -->
                       <g
                         class="body-zone"
                         :class="{ 'body-zone--applied': appliedParts.has('left-arm') }"
@@ -215,12 +233,12 @@ watch(() => store.locationName, () => {
                         @keydown.enter="togglePart('left-arm')"
                       >
                         <title>Left arm</title>
-                        <rect x="103" y="44" width="20" height="54" rx="8" />
-                        <text x="113" y="68" text-anchor="middle" class="arm-label" :class="{ 'arm-label--hidden': appliedParts.has('left-arm') }">L</text>
-                        <text v-if="appliedParts.has('left-arm')" x="113" y="72" text-anchor="middle" class="check-text">✓</text>
+                        <rect x="17" y="44" width="20" height="54" rx="8" />
+                        <text x="27" y="68" text-anchor="middle" class="arm-label" :class="{ 'arm-label--hidden': appliedParts.has('left-arm') }">L</text>
+                        <text v-if="appliedParts.has('left-arm')" x="27" y="72" text-anchor="middle" class="check-text">✓</text>
                       </g>
 
-                      <!-- Right arm (user's right = viewer's left) -->
+                      <!-- Right arm (viewer's right) -->
                       <g
                         class="body-zone"
                         :class="{ 'body-zone--applied': appliedParts.has('right-arm') }"
@@ -231,9 +249,9 @@ watch(() => store.locationName, () => {
                         @keydown.enter="togglePart('right-arm')"
                       >
                         <title>Right arm</title>
-                        <rect x="17" y="44" width="20" height="54" rx="8" />
-                        <text x="27" y="68" text-anchor="middle" class="arm-label" :class="{ 'arm-label--hidden': appliedParts.has('right-arm') }">R</text>
-                        <text v-if="appliedParts.has('right-arm')" x="27" y="72" text-anchor="middle" class="check-text">✓</text>
+                        <rect x="103" y="44" width="20" height="54" rx="8" />
+                        <text x="113" y="68" text-anchor="middle" class="arm-label" :class="{ 'arm-label--hidden': appliedParts.has('right-arm') }">R</text>
+                        <text v-if="appliedParts.has('right-arm')" x="113" y="72" text-anchor="middle" class="check-text">✓</text>
                       </g>
 
                       <!-- Left leg (user's left = viewer's right) -->
@@ -290,7 +308,7 @@ watch(() => store.locationName, () => {
                     <li class="checklist-row checklist-row--total">
                       <span class="checklist-icon"></span>
                       <span class="fw-semibold">Total for full body</span>
-                      <span class="ms-auto small fw-semibold">~6 tsp / 30 ml</span>
+                      <span class="ms-auto small fw-semibold">~7 tsp / 35 ml</span>
                     </li>
                   </ul>
 
