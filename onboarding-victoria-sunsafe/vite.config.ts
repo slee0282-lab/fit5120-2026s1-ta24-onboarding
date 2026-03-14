@@ -10,7 +10,11 @@ export default defineConfig({
     vue(),
     vueDevTools(),
   ],
-  base: '/fit5120-2026s1-ta24-onboarding/',
+  server: {
+    proxy: {
+      '/api': 'http://localhost:8788',
+    },
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
