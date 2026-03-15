@@ -1,3 +1,6 @@
 name = "victoria-sunsafe"
 pages_build_output_dir = "dist"
 compatibility_date = "2026-03-14"
+
+[vars]
+VITE_PASSWORD = "2026s1-ta24"
