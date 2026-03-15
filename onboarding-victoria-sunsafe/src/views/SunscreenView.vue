@@ -56,22 +56,43 @@ const spf = computed(() => (uvIndex.value !== null ? spfRecommendation(uvIndex.v
 
 // --- Interactive body parts ---
 const BODY_PARTS = [
-  { id: 'face',        label: 'Face, head and neck' },
-  { id: 'left-arm',   label: 'Left arm' },
-  { id: 'right-arm',  label: 'Right arm' },
-  { id: 'body-front', label: 'Body (front)' },
-  { id: 'body-back',  label: 'Body (back)' },
-  { id: 'left-leg',   label: 'Left leg' },
-  { id: 'right-leg',  label: 'Right leg' },
-]
+  { id: 'face', label: 'Face, head and neck', tsp: 1 },
+  { id: 'left-upper-arm', label: 'Left upper arm', tsp: 0.5 },
+  { id: 'right-upper-arm', label: 'Right upper arm', tsp: 0.5 },
+  { id: 'left-lower-arm', label: 'Left forearm', tsp: 0.5 },
+  { id: 'right-lower-arm', label: 'Right forearm', tsp: 0.5 },
+  { id: 'body-front', label: 'Body (front)', tsp: 1 },
+  { id: 'body-back', label: 'Body (back)', tsp: 1 },
+  { id: 'left-upper-leg', label: 'Left upper leg', tsp: 0.5 },
+  { id: 'right-upper-leg', label: 'Right upper leg', tsp: 0.5 },
+  { id: 'left-lower-leg', label: 'Left lower leg', tsp: 0.5 },
+  { id: 'right-lower-leg', label: 'Right lower leg', tsp: 0.5 },
+] as const
+
+type BodyPartId = (typeof BODY_PARTS)[number]['id']
 
 const appliedParts = ref<Set<string>>(new Set())
+const mirroredSelection = ref(true)
+
+const PAIRED_PARTS: Record<string, string> = {
+  'left-upper-arm': 'right-upper-arm',
+  'right-upper-arm': 'left-upper-arm',
+  'left-lower-arm': 'right-lower-arm',
+  'right-lower-arm': 'left-lower-arm',
+  'left-upper-leg': 'right-upper-leg',
+  'right-upper-leg': 'left-upper-leg',
+  'left-lower-leg': 'right-lower-leg',
+  'right-lower-leg': 'left-lower-leg',
+}
 
 function togglePart(id: string) {
+  const partner = mirroredSelection.value ? PAIRED_PARTS[id] : undefined
   if (appliedParts.value.has(id)) {
     appliedParts.value.delete(id)
+    if (partner) appliedParts.value.delete(partner)
   } else {
     appliedParts.value.add(id)
+    if (partner) appliedParts.value.add(partner)
   }
   appliedParts.value = new Set(appliedParts.value)
 }
@@ -82,6 +103,15 @@ function resetParts() {
 
 const appliedCount = computed(() => appliedParts.value.size)
 const allCovered = computed(() => appliedParts.value.size === BODY_PARTS.length)
+const unselectedTsp = computed(() =>
+  BODY_PARTS
+    .filter((part) => !appliedParts.value.has(part.id))
+    .reduce((sum, part) => sum + part.tsp, 0),
+)
+const unselectedMl = computed(() => unselectedTsp.value * 5)
+
+const totalTsp = computed(() => BODY_PARTS.reduce((sum, part) => sum + part.tsp, 0))
+const totalMl = computed(() => totalTsp.value * 5)
 
 watch(() => store.locationName, () => {
   appliedParts.value = new Set()
@@ -145,13 +175,17 @@ watch(() => store.locationName, () => {
             <div class="col-12 col-lg-6">
               <div class="card">
                 <div class="card-header d-flex align-items-center justify-content-between">
-                  <span class="fw-semibold">How much sunscreen to apply</span>
+                  <span class="fw-semibold">Recommended Sunscreen Dosage</span>
                   <button class="btn btn-sm btn-outline-secondary" @click="resetParts">Reset</button>
                 </div>
                 <div class="card-body">
+                  <div class="alert alert-info small mb-3" role="alert">
+                    Apply <strong>~{{ unselectedTsp }} teaspoon<span v-if="unselectedTsp !== 1">s</span> ({{ unselectedMl }} ml)</strong>
+                    of sunscreen, 20 minutes before going outside. Reapply every <strong>2 hours</strong>.
+                  </div>
+
                   <p class="small text-muted mb-3">
-                    Apply <strong>1 teaspoon (5 ml)</strong> per body part, 20 minutes before sun exposure.
-                    Tap a zone on the diagram or the list below to mark it as covered.
+                    Based on your outfit, tap the areas of your body that are covered.
                   </p>
 
                   <!-- Progress bar -->
@@ -174,6 +208,32 @@ watch(() => store.locationName, () => {
                       role="img"
                       aria-label="Body diagram — tap zones to mark sunscreen applied"
                     >
+                      <!-- Mirrored toggle -->
+                      <g
+                        class="diagram-toggle"
+                        role="checkbox"
+                        :aria-checked="mirroredSelection"
+                        transform="translate(40 0)"
+                        tabindex="0"
+                        @click="mirroredSelection = !mirroredSelection"
+                        @keydown.enter.prevent="mirroredSelection = !mirroredSelection"
+                        @keydown.space.prevent="mirroredSelection = !mirroredSelection"
+                      >
+                        <title>Mirrored selection</title>
+                        <rect x="90" y="170" width="46" height="18" rx="3" class="diagram-toggle-pill" />
+                        <rect
+                          x="94"
+                          y="174"
+                          width="10"
+                          height="10"
+                          rx="1.5"
+                          class="diagram-toggle-box"
+                          :class="{ 'diagram-toggle-box--checked': mirroredSelection }"
+                        />
+                        <text v-if="mirroredSelection" x="99" y="182" text-anchor="middle" class="diagram-toggle-check">✓</text>
+                        <text x="107" y="182" class="diagram-toggle-label">Mirror</text>
+                      </g>
+
                       <!-- Face, head and neck -->
                       <g
                         class="body-zone"
@@ -201,9 +261,9 @@ watch(() => store.locationName, () => {
                         @keydown.enter="togglePart('body-front')"
                       >
                         <title>Body (front)</title>
-                        <rect x="38" y="44" width="64" height="26" rx="5" />
-                        <text x="70" y="58" text-anchor="middle" class="arm-label" :class="{ 'arm-label--hidden': appliedParts.has('body-front') }">Front</text>
-                        <text v-if="appliedParts.has('body-front')" x="70" y="62" text-anchor="middle" class="check-text">✓</text>
+                        <path d="M62 44 H78 A18 18 0 0 1 96 62 V78 H44 V62 A18 18 0 0 1 62 44 Z" />
+                        <text v-if="!appliedParts.has('body-front')" x="70" y="65" text-anchor="middle" class="part-label">Front</text>
+                        <text v-if="appliedParts.has('body-front')" x="70" y="65" text-anchor="middle" class="check-text">Front ✓</text>
                       </g>
 
                       <!-- Body back (bottom half of torso) -->
@@ -217,72 +277,131 @@ watch(() => store.locationName, () => {
                         @keydown.enter="togglePart('body-back')"
                       >
                         <title>Body (back)</title>
-                        <rect x="38" y="71" width="64" height="27" rx="5" />
-                        <text x="70" y="87" text-anchor="middle" class="arm-label" :class="{ 'arm-label--hidden': appliedParts.has('body-back') }">Back</text>
-                        <text v-if="appliedParts.has('body-back')" x="70" y="87" text-anchor="middle" class="check-text">✓</text>
+                        <path d="M44 78 H96 V94 A18 18 0 0 1 78 112 H62 A18 18 0 0 1 44 94 Z" />
+                        <text v-if="!appliedParts.has('body-back')" x="70" y="97" text-anchor="middle" class="part-label">Back</text>
+                        <text v-if="appliedParts.has('body-back')" x="70" y="99" text-anchor="middle" class="check-text">Back ✓</text>
                       </g>
 
-                      <!-- Left arm (viewer's left) -->
+                      <!-- Left upper arm -->
                       <g
                         class="body-zone"
-                        :class="{ 'body-zone--applied': appliedParts.has('left-arm') }"
-                        @click="togglePart('left-arm')"
+                        :class="{ 'body-zone--applied': appliedParts.has('left-upper-arm') }"
+                        @click="togglePart('left-upper-arm')"
                         role="button"
                         tabindex="0"
-                        aria-label="Left arm"
-                        @keydown.enter="togglePart('left-arm')"
+                        aria-label="Left upper arm"
+                        @keydown.enter="togglePart('left-upper-arm')"
                       >
-                        <title>Left arm</title>
-                        <rect x="17" y="44" width="20" height="54" rx="8" />
-                        <text x="27" y="68" text-anchor="middle" class="arm-label" :class="{ 'arm-label--hidden': appliedParts.has('left-arm') }">L</text>
-                        <text v-if="appliedParts.has('left-arm')" x="27" y="72" text-anchor="middle" class="check-text">✓</text>
+                        <title>Left upper arm</title>
+                        <path d="M32 51 H34 A7 7 0 0 1 41 58 V81 H25 V58 A7 7 0 0 1 32 51 Z" />
+                        <text v-if="appliedParts.has('left-upper-arm')" x="33" y="70" text-anchor="middle" class="check-text">✓</text>
                       </g>
 
-                      <!-- Right arm (viewer's right) -->
+                      <!-- Left lower arm -->
                       <g
                         class="body-zone"
-                        :class="{ 'body-zone--applied': appliedParts.has('right-arm') }"
-                        @click="togglePart('right-arm')"
+                        :class="{ 'body-zone--applied': appliedParts.has('left-lower-arm') }"
+                        @click="togglePart('left-lower-arm')"
                         role="button"
                         tabindex="0"
-                        aria-label="Right arm"
-                        @keydown.enter="togglePart('right-arm')"
+                        aria-label="Left lower arm"
+                        @keydown.enter="togglePart('left-lower-arm')"
                       >
-                        <title>Right arm</title>
-                        <rect x="103" y="44" width="20" height="54" rx="8" />
-                        <text x="113" y="68" text-anchor="middle" class="arm-label" :class="{ 'arm-label--hidden': appliedParts.has('right-arm') }">R</text>
-                        <text v-if="appliedParts.has('right-arm')" x="113" y="72" text-anchor="middle" class="check-text">✓</text>
+                        <title>Left lower arm</title>
+                        <path d="M25 81 H41 V108 A7 7 0 0 1 34 115 H32 A7 7 0 0 1 25 108 Z" />
+                        <text v-if="appliedParts.has('left-lower-arm')" x="33" y="102" text-anchor="middle" class="check-text">✓</text>
                       </g>
 
-                      <!-- Left leg (user's left = viewer's right) -->
+                      <!-- Right upper arm -->
                       <g
                         class="body-zone"
-                        :class="{ 'body-zone--applied': appliedParts.has('left-leg') }"
-                        @click="togglePart('left-leg')"
+                        :class="{ 'body-zone--applied': appliedParts.has('right-upper-arm') }"
+                        @click="togglePart('right-upper-arm')"
                         role="button"
                         tabindex="0"
-                        aria-label="Left leg"
-                        @keydown.enter="togglePart('left-leg')"
+                        aria-label="Right upper arm"
+                        @keydown.enter="togglePart('right-upper-arm')"
                       >
-                        <title>Left leg</title>
-                        <rect x="72" y="98" width="28" height="78" rx="8" />
-                        <text v-if="appliedParts.has('left-leg')" x="86" y="140" text-anchor="middle" class="check-text">✓</text>
+                        <title>Right upper arm</title>
+                        <path d="M106 51 H108 A7 7 0 0 1 115 58 V81 H99 V58 A7 7 0 0 1 106 51 Z" />
+                        <text v-if="appliedParts.has('right-upper-arm')" x="107" y="70" text-anchor="middle" class="check-text">✓</text>
                       </g>
 
-                      <!-- Right leg (user's right = viewer's left) -->
+                      <!-- Right lower arm -->
                       <g
                         class="body-zone"
-                        :class="{ 'body-zone--applied': appliedParts.has('right-leg') }"
-                        @click="togglePart('right-leg')"
+                        :class="{ 'body-zone--applied': appliedParts.has('right-lower-arm') }"
+                        @click="togglePart('right-lower-arm')"
                         role="button"
                         tabindex="0"
-                        aria-label="Right leg"
-                        @keydown.enter="togglePart('right-leg')"
+                        aria-label="Right lower arm"
+                        @keydown.enter="togglePart('right-lower-arm')"
                       >
-                        <title>Right leg</title>
-                        <rect x="40" y="98" width="28" height="78" rx="8" />
-                        <text v-if="appliedParts.has('right-leg')" x="54" y="140" text-anchor="middle" class="check-text">✓</text>
+                        <title>Right lower arm</title>
+                        <path d="M99 81 H115 V108 A7 7 0 0 1 108 115 H106 A7 7 0 0 1 99 108 Z" />
+                        <text v-if="appliedParts.has('right-lower-arm')" x="107" y="102" text-anchor="middle" class="check-text">✓</text>
                       </g>
+
+                      <!-- Left upper leg -->
+                      <g
+                        class="body-zone"
+                        :class="{ 'body-zone--applied': appliedParts.has('left-upper-leg') }"
+                        @click="togglePart('left-upper-leg')"
+                        role="button"
+                        tabindex="0"
+                        aria-label="Left upper leg"
+                        @keydown.enter="togglePart('left-upper-leg')"
+                      >
+                        <title>Left upper leg</title>
+                        <path d="M53,113 H58 a8,8 0 0 1 8,8 V149 H45 V121 a8,8 0 0 1 8,-8 Z" />
+                        <text v-if="appliedParts.has('left-upper-leg')" x="55" y="135" text-anchor="middle" class="check-text">✓</text>
+                      </g>
+
+                      <!-- Left lower leg -->
+                      <g
+                        class="body-zone"
+                        :class="{ 'body-zone--applied': appliedParts.has('left-lower-leg') }"
+                        @click="togglePart('left-lower-leg')"
+                        role="button"
+                        tabindex="0"
+                        aria-label="Left lower leg"
+                        @keydown.enter="togglePart('left-lower-leg')"
+                      >
+                        <title>Left lower leg</title>
+                        <path d="M45,149 H66 V175 a8,8 0 0 1 -8,8 H53 a8,8 0 0 1 -8,-8 Z" />
+                        <text v-if="appliedParts.has('left-lower-leg')" x="55" y="170" text-anchor="middle" class="check-text">✓</text>
+                      </g>
+
+                      <!-- Right upper leg -->
+                      <g
+                        class="body-zone"
+                        :class="{ 'body-zone--applied': appliedParts.has('right-upper-leg') }"
+                        @click="togglePart('right-upper-leg')"
+                        role="button"
+                        tabindex="0"
+                        aria-label="Right upper leg"
+                        @keydown.enter="togglePart('right-upper-leg')"
+                      >
+                        <title>Right upper leg</title>
+                        <path d="M82,113 H87 a8,8 0 0 1 8,8 V149 H74 V121 a8,8 0 0 1 8,-8 Z" />
+                        <text v-if="appliedParts.has('right-upper-leg')" x="84" y="135" text-anchor="middle" class="check-text">✓</text>
+                      </g>
+
+                      <!-- Right lower leg -->
+                      <g
+                        class="body-zone"
+                        :class="{ 'body-zone--applied': appliedParts.has('right-lower-leg') }"
+                        @click="togglePart('right-lower-leg')"
+                        role="button"
+                        tabindex="0"
+                        aria-label="Right lower leg"
+                        @keydown.enter="togglePart('right-lower-leg')"
+                      >
+                        <title>Right lower leg</title>
+                        <path d="M74,149 H95 V175 a8,8 0 0 1 -8,8 H82 a8,8 0 0 1 -8,-8 Z" />
+                        <text v-if="appliedParts.has('right-lower-leg')" x="84" y="170" text-anchor="middle" class="check-text">✓</text>
+                      </g>
+
                     </svg>
                   </div>
 
@@ -303,12 +422,12 @@ watch(() => store.locationName, () => {
                       <span :class="{ 'text-decoration-line-through text-muted': appliedParts.has(part.id) }">
                         {{ part.label }}
                       </span>
-                      <span class="ms-auto small text-muted">~1 tsp</span>
+                      <span class="ms-auto small text-muted">~{{ part.tsp }} tsp</span>
                     </li>
                     <li class="checklist-row checklist-row--total">
                       <span class="checklist-icon"></span>
-                      <span class="fw-semibold">Total for full body</span>
-                      <span class="ms-auto small fw-semibold">~7 tsp / 35 ml</span>
+                      <span class="fw-semibold">Total</span>
+                      <span class="ms-auto small fw-semibold">~{{ unselectedTsp }} tsp / 35 ml</span>
                     </li>
                   </ul>
 
@@ -418,6 +537,42 @@ watch(() => store.locationName, () => {
   width: 100%;
   max-width: 180px;
   height: auto;
+  overflow: visible;
+}
+
+.diagram-toggle {
+  cursor: pointer;
+}
+
+.diagram-toggle-pill {
+  fill: #f8f9fa;
+  stroke: #ced4da;
+  stroke-width: 1;
+}
+
+.diagram-toggle-box {
+  fill: white;
+  stroke: #adb5bd;
+  stroke-width: 1;
+}
+
+.diagram-toggle-box--checked {
+  fill: #198754;
+  stroke: #146c43;
+}
+
+.diagram-toggle-check {
+  fill: white;
+  font-size: 9px;
+  font-family: system-ui, sans-serif;
+  pointer-events: none;
+}
+
+.diagram-toggle-label {
+  fill: #6c757d;
+  font-size: 8px;
+  font-family: system-ui, sans-serif;
+  pointer-events: none;
 }
 
 .body-zone {
@@ -455,16 +610,12 @@ watch(() => store.locationName, () => {
   font-size: 18px;
 }
 
-.arm-label {
+.part-label {
   fill: #868e96;
   font-size: 9px;
-  font-weight: bold;
+  font-weight: normal;
   font-family: system-ui, sans-serif;
   pointer-events: none;
-}
-
-.arm-label--hidden {
-  fill: transparent;
 }
 
 .figure-label {
