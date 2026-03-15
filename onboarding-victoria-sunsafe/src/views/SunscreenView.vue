@@ -331,7 +331,7 @@ watch(() => store.locationName, () => {
             <div class="col-12 col-lg-6">
               <!-- Safe exposure time -->
               <div v-if="safeMinutes !== null" class="alert alert-info mb-1" role="alert">
-                <strong>Safe exposure time: {{ safeMinutes }} minutes</strong>
+                <strong>Your skin will burn in {{ safeMinutes }} minutes</strong>
                 <p class="mb-0 mt-1 small">
                   At UV Index {{ uvIndex }}, unprotected skin (Type {{ selectedSkinType }}) can be exposed for
                   approximately {{ safeMinutes }} minutes before first-degree sunburn may begin.
