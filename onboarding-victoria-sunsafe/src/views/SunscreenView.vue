@@ -82,6 +82,8 @@ function resetParts() {
 
 const appliedCount = computed(() => appliedParts.value.size)
 const allCovered = computed(() => appliedParts.value.size === BODY_PARTS.length)
+const selectedTsp = computed(() => appliedParts.value.size)
+const selectedMl = computed(() => appliedParts.value.size * 5)
 
 watch(() => store.locationName, () => {
   appliedParts.value = new Set()
@@ -307,8 +309,8 @@ watch(() => store.locationName, () => {
                     </li>
                     <li class="checklist-row checklist-row--total">
                       <span class="checklist-icon"></span>
-                      <span class="fw-semibold">Total for full body</span>
-                      <span class="ms-auto small fw-semibold">~7 tsp / 35 ml</span>
+                      <span class="fw-semibold">Total for selected parts</span>
+                      <span class="ms-auto small fw-semibold">{{ selectedTsp }} tsp / {{ selectedMl }} ml</span>
                     </li>
                   </ul>
 
