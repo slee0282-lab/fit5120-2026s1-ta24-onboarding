@@ -10,10 +10,10 @@ interface UVCategory {
 }
 
 function getCategory(uv: number): UVCategory {
-  if (uv <= 2) return { label: 'Low', color: '#4caf50', textColor: '#fff' }
-  if (uv <= 5) return { label: 'Moderate', color: '#ffeb3b', textColor: '#333' }
-  if (uv <= 7) return { label: 'High', color: '#ff9800', textColor: '#fff' }
-  if (uv <= 10) return { label: 'Very High', color: '#f44336', textColor: '#fff' }
+  if (uv < 3) return { label: 'Low', color: '#4caf50', textColor: '#fff' }
+  if (uv < 6) return { label: 'Moderate', color: '#ffeb3b', textColor: '#333' }
+  if (uv < 8) return { label: 'High', color: '#ff9800', textColor: '#fff' }
+  if (uv < 11) return { label: 'Very High', color: '#f44336', textColor: '#fff' }
   return { label: 'Extreme', color: '#9c27b0', textColor: '#fff' }
 }
 
@@ -21,6 +21,10 @@ import { computed } from 'vue'
 
 const category = computed(() =>
   props.uvIndex !== null ? getCategory(props.uvIndex) : null
+)
+
+const displayUv = computed(() =>
+  props.uvIndex !== null ? props.uvIndex.toFixed(1) : null
 )
 </script>
 

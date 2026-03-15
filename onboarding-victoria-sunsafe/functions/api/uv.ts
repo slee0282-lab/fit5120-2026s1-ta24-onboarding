@@ -20,10 +20,10 @@ interface UVResponse {
 }
 
 function uvCategory(uv: number): string {
-  if (uv <= 2) return 'Low'
-  if (uv <= 5) return 'Moderate'
-  if (uv <= 7) return 'High'
-  if (uv <= 10) return 'Very High'
+  if (uv < 3) return 'Low'
+  if (uv < 6) return 'Moderate'
+  if (uv < 8) return 'High'
+  if (uv < 11) return 'Very High'
   return 'Extreme'
 }
 
