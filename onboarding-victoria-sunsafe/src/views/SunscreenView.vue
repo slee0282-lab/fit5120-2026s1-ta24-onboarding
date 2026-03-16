@@ -35,7 +35,7 @@ const safeMinutes = computed(() => {
 })
 
 function spfRecommendation(uvi: number, skinType: 1 | 2 | 3 | 4): { spf: string; reapply: string; detail: string } {
-  // At UV ≥ 6 Cancer Council recommends SPF 50+ for everyone regardless of skin type.
+  // At UV ≥ 6 Cancer Council NSW (CCNSW) recommends SPF 50+ for everyone regardless of skin type.
   // At UV 3–5 (Moderate), Types I/II (burns easily) warrant SPF 50+; Types III/IV SPF 30+.
   // At UV ≤ 2 (Low) differentiation matters most: fairer skin still needs SPF 30+.
   if (uvi <= 2) {
@@ -85,6 +85,13 @@ const PAIRED_PARTS: Record<string, string> = {
   'right-lower-leg': 'left-lower-leg',
 }
 
+const PAIR_LABELS: Record<string, string> = {
+  'left-upper-arm': 'left and right upper arms',
+  'left-lower-arm': 'left and right forearms',
+  'left-upper-leg': 'left and right upper legs',
+  'left-lower-leg': 'left and right lower legs',
+}
+
 function togglePart(id: string) {
   const partner = mirroredSelection.value ? PAIRED_PARTS[id] : undefined
   if (appliedParts.value.has(id)) {
@@ -112,6 +119,25 @@ const unselectedMl = computed(() => unselectedTsp.value * 5)
 
 const totalTsp = computed(() => BODY_PARTS.reduce((sum, part) => sum + part.tsp, 0))
 const totalMl = computed(() => totalTsp.value * 5)
+
+const uncoveredSummary = computed(() => {
+  const uncovered = BODY_PARTS.filter(p => !appliedParts.value.has(p.id))
+  const seen = new Set<string>()
+  const result: { label: string; tsp: number }[] = []
+  for (const part of uncovered) {
+    if (seen.has(part.id)) continue
+    const partnerId = PAIRED_PARTS[part.id]
+    if (partnerId && !appliedParts.value.has(partnerId) && PAIR_LABELS[part.id]) {
+      result.push({ label: PAIR_LABELS[part.id], tsp: part.tsp * 2 })
+      seen.add(part.id)
+      seen.add(partnerId)
+    } else {
+      result.push({ label: part.label.toLowerCase(), tsp: part.tsp })
+      seen.add(part.id)
+    }
+  }
+  return result
+})
 
 watch(() => store.locationName, () => {
   appliedParts.value = new Set()
@@ -180,8 +206,18 @@ watch(() => store.locationName, () => {
                 </div>
                 <div class="card-body">
                   <div class="alert alert-info small mb-3" role="alert">
-                    Apply <strong>~{{ unselectedTsp }} teaspoon<span v-if="unselectedTsp !== 1">s</span> ({{ unselectedMl }} ml)</strong>
-                    of sunscreen, 20 minutes before going outside. Reapply every <strong>2 hours</strong>.
+                    <span v-if="unselectedTsp > 0">
+                      Apply <strong>~{{ unselectedTsp }} teaspoon<span v-if="unselectedTsp !== 1">s</span> ({{ unselectedMl }} ml)</strong>
+                      of sunscreen, 20 minutes before going outside. Reapply every <strong>2 hours</strong>.
+                      <ul v-if="uncoveredSummary.length > 0" class="mb-0 mt-1 ps-3">
+                        <li v-for="item in uncoveredSummary" :key="item.label">
+                          ~{{ item.tsp }} tsp to {{ item.label }}
+                        </li>
+                      </ul>
+                    </span>
+                    <span v-else>
+                      All areas covered — no additional sunscreen needed.
+                    </span>
                   </div>
 
                   <p class="small text-muted mb-3">
@@ -438,7 +474,7 @@ watch(() => store.locationName, () => {
                 </div>
               </div>
               <p class="text-muted mt-2" style="font-size: 11px">
-                © Cancer Council Australia. All rights reserved.
+                © Cancer Council NSW (CCNSW). All rights reserved.
                 "The average adult needs about 35 mL (around 7 teaspoons) for full-body coverage –
                 at least one teaspoon each for your arms, legs, front, back, face/neck/ears."
                 Reproduced for non-commercial educational purposes.
@@ -473,8 +509,8 @@ watch(() => store.locationName, () => {
                 </ul>
               </div>
               <p v-if="spf" class="text-muted mb-4" style="font-size: 11px">
-                © Cancer Council Australia. All rights reserved.
-                SPF guidance sourced from Cancer Council Australia's SunSmart sun protection guidelines,
+                © Cancer Council NSW (CCNSW). All rights reserved.
+                SPF guidance sourced from Cancer Council NSW (CCNSW)'s SunSmart sun protection guidelines,
                 reproduced for non-commercial educational purposes.
                 <a href="https://www.cancer.org.au" target="_blank" rel="noopener">cancer.org.au</a>
                 · Safe exposure time: Sánchez-Pérez et al. (2019), <em>Sci Rep</em> 9, 733
