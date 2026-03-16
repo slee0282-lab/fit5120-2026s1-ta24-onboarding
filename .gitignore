@@ -1,11 +1,1 @@
-# Python virtual environment
-backend/.venv/
-backend/venv/
-
-# Environment secrets
-backend/.env
-
-# Python cache
-__pycache__/
-*.pyc
-*.pyo
+.DS_Store
