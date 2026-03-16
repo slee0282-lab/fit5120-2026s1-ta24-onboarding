@@ -37,6 +37,10 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     return Response.json({ error: 'Please provide a suburb, postcode, or coordinates.' }, { status: 400 })
   }
 
+  if (q.length > 100) {
+    return Response.json({ error: 'Query too long.' }, { status: 400 })
+  }
+
   const apiKey = env.OPENWEATHER_API_KEY
   let lat: number
   let lon: number
@@ -48,7 +52,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     lon = parseFloat(lonParam)
     locationName = 'Your location'
 
-    if (isNaN(lat) || isNaN(lon)) {
+    if (isNaN(lat) || isNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
       return Response.json({ error: 'Invalid coordinates provided.' }, { status: 400 })
     }
   } else if (/^\d+$/.test(q)) {
