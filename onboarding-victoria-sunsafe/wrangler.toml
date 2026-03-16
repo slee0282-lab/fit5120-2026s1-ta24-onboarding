@@ -2,5 +2,5 @@ name = "victoria-sunsafe"
 pages_build_output_dir = "dist"
 compatibility_date = "2026-03-14"
 
-[vars]
-VITE_PASSWORD = "2026s1-ta24"
+# Non-secret vars go here. Secrets (VITE_PASSWORD, OPENWEATHER_API_KEY) are set via
+# Cloudflare dashboard or: wrangler secret put VITE_PASSWORD
