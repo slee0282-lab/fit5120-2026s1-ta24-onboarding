@@ -1,3 +1,8 @@
+// Cloudflare Pages Function: handles GET /api/uv
+// This file runs server-side on Cloudflare's edge infrastructure — NOT in the browser.
+// Flow: Frontend → Cloudflare (this function) → OpenWeatherMap API → response back to frontend
+// The API key is injected at runtime from Cloudflare Secrets (never exposed to the client).
+
 interface Env {
   OPENWEATHER_API_KEY: string
 }
