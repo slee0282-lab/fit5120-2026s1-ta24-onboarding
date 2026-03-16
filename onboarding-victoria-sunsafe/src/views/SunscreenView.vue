@@ -128,7 +128,7 @@ const uncoveredSummary = computed(() => {
     if (seen.has(part.id)) continue
     const partnerId = PAIRED_PARTS[part.id]
     if (partnerId && !appliedParts.value.has(partnerId) && PAIR_LABELS[part.id]) {
-      result.push({ label: PAIR_LABELS[part.id], tsp: part.tsp * 2 })
+      result.push({ label: PAIR_LABELS[part.id]!, tsp: part.tsp * 2 })
       seen.add(part.id)
       seen.add(partnerId)
     } else {
