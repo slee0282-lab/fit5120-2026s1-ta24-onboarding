@@ -14,6 +14,7 @@ const errorMessage = ref<string | null>(null);
 const loading = ref(false);
 const textQuery = ref("");
 const selectedCity = ref("");
+const showLocationOptions = ref(true);
 const hourlyForecast = ref<Array<{ time: string; uvi: number }>>([]);
 
 interface UVApiResponse {
@@ -146,12 +147,18 @@ async function fetchUVByCoords(lat: number, lon: number, name: string) {
 
 function handleCitySelect() {
   const city = VICTORIA_CITIES.find((c) => c.label === selectedCity.value);
-  if (city) fetchUVByCoords(city.lat, city.lon, `${city.label}, VIC`);
+  if (city) {
+    showLocationOptions.value = false;
+    fetchUVByCoords(city.lat, city.lon, `${city.label}, VIC`);
+  }
 }
 
 function handleTextSearch() {
   const trimmed = textQuery.value.trim();
-  if (trimmed) fetchUVByQuery(trimmed);
+  if (trimmed) {
+    showLocationOptions.value = false;
+    fetchUVByQuery(trimmed);
+  }
 }
 
 function getUvCategory(uvi: number): string {
@@ -205,12 +212,11 @@ onUnmounted(() => {
     <div class="row justify-content-center">
       <div class="col-12 col-md-8 col-lg-6">
         <h1 class="mb-1">UV Index</h1>
-        <p class="text-muted mb-4">
+        <p :class="'text-muted small mb-2'">
           Check the current UV level for any Victorian suburb or postcode.
         </p>
 
-        <!-- Location input options -->
-        <div class="card mb-4">
+        <div v-if="showLocationOptions" class="card mb-4">
           <!-- City dropdown -->
           <div
             class="card-body border-bottom d-flex align-items-center justify-content-between gap-3 flex-wrap"
@@ -256,6 +262,16 @@ onUnmounted(() => {
               </button>
             </form>
           </div>
+        </div>
+
+        <div v-else class="d-grid mb-4">
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            @click="showLocationOptions = true"
+          >
+            Select Location
+          </button>
         </div>
 
         <!-- Loading spinner -->
