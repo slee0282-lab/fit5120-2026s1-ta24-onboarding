@@ -228,7 +228,7 @@ watch(() => store.locationName, () => {
                   </div>
 
                   <p class="small text-muted mb-3">
-                    Based on your outfit, tap the areas of your body that are covered.
+                    Based on your outfit, tap the areas of your body that are <strong>covered</strong> by clothing.
                   </p>
 
                   <!-- Progress bar -->
@@ -469,7 +469,7 @@ watch(() => store.locationName, () => {
                     </li>
                     <li class="checklist-row checklist-row--total">
                       <span class="checklist-icon"></span>
-                      <span class="fw-semibold">Still needed</span>
+                      <span class="fw-semibold">Total required</span>
                       <span class="ms-auto small fw-semibold">~{{ unselectedTsp }} tsp / {{ unselectedMl }} ml</span>
                     </li>
                   </ul>
