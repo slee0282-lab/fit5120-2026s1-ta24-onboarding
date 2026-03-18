@@ -11,11 +11,12 @@ interface AlertLevel {
 }
 
 function getAlert(uv: number): AlertLevel {
+  const displayUv = uv.toFixed(1)
   if (uv < 3) {
     return {
       show: true,
       variant: 'success',
-      message: `UV Index ${uv} — Low`,
+      message: `UV Index ${displayUv} — Low`,
       action: 'It is still recommended to wear sunscreen if outside for extended periods, though not necessary.',
     }
   }
@@ -23,7 +24,7 @@ function getAlert(uv: number): AlertLevel {
     return {
       show: true,
       variant: 'warning',
-      message: `UV Index ${uv} — Moderate`,
+      message: `UV Index ${displayUv} — Moderate`,
       action: 'Apply SPF 30+ sunscreen to exposed skin, and a hat if outside for extended periods.',
     }
   }
@@ -31,7 +32,7 @@ function getAlert(uv: number): AlertLevel {
     return {
       show: true,
       variant: 'warning',
-      message: `UV Index ${uv} — High`,
+      message: `UV Index ${displayUv} — High`,
       action: 'Apply SPF 50+ sunscreen, wear protective clothing and seek shade at peak hours.',
     }
   }
@@ -39,14 +40,14 @@ function getAlert(uv: number): AlertLevel {
     return {
       show: true,
       variant: 'danger',
-      message: `UV Index ${uv} — Very High`,
+      message: `UV Index ${displayUv} — Very High`,
       action: 'Avoid sun exposure where possible. Use SPF 50+, sunglasses, hat and protective clothing.',
     }
   }
   return {
     show: true,
     variant: 'danger',
-    message: `UV Index ${uv} — Extreme`,
+    message: `UV Index ${displayUv} — Extreme`,
     action: 'Stay indoors if possible. Full protection essential: SPF 50+, hat, sunglasses, long sleeves.',
   }
 }

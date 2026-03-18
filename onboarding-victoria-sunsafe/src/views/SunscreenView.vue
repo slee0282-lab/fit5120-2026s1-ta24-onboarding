@@ -33,6 +33,8 @@ const safeMinutes = computed(() => {
   return calcSafeMinutes(uvIndex.value, selectedSkinType.value)
 })
 
+const displayUvIndex = computed(() => (uvIndex.value !== null ? uvIndex.value.toFixed(1) : null))
+
 function spfRecommendation(uvi: number, skinType: 1 | 2 | 3 | 4): { spf: string; reapply: string; detail: string } {
   // At UV ≥ 6 Cancer Council NSW (CCNSW) recommends SPF 50+ for everyone regardless of skin type.
   // At UV 3–5 (Moderate), Types I/II (burns easily) warrant SPF 50+; Types III/IV SPF 30+.
@@ -493,9 +495,9 @@ watch(() => store.locationName, () => {
               <div v-if="safeMinutes !== null" class="alert alert-info mb-1" role="alert">
                 <strong>Your skin will burn in {{ safeMinutes }} minutes</strong>
                 <p class="mb-0 mt-1 small">
-                  At UV Index {{ uvIndex }}, unprotected skin (Type {{ selectedSkinType }}) can be exposed for
+                  At UV Index {{ displayUvIndex }}, unprotected skin (Type {{ selectedSkinType }}) can be exposed for
                   approximately {{ safeMinutes }} minutes before first-degree sunburn may begin.
-                  Sunscreen extends this time significantly — apply and reapply as recommended.
+                  Sunscreen extends this time significantly.
                 </p>
               </div>
               <p v-if="safeMinutes !== null" class="text-muted mb-4" style="font-size: 11px">

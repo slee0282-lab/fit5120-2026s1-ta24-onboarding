@@ -191,6 +191,10 @@ function getUvBlockHeight(uvi: number): string {
   return `${getUvBlockHeightPx(uvi)}px`;
 }
 
+function formatUvi(uvi: number): string {
+  return uvi.toFixed(1);
+}
+
 function getForecastSlotHeight(): string {
   const tallest = hourlyForecast.value.reduce(
     (maxHeight, point) => Math.max(maxHeight, getUvBlockHeightPx(point.uvi)),
@@ -200,7 +204,7 @@ function getForecastSlotHeight(): string {
 }
 
 function forecastTooltip(point: { time: string; uvi: number }): string {
-  return `${point.time} · ${getUvCategory(point.uvi)} · UV ${point.uvi}`;
+  return `${point.time} · ${getUvCategory(point.uvi)} · UV ${formatUvi(point.uvi)}`;
 }
 
 function isSelectedForecastPoint(point: { time: string; uvi: number }): boolean {
@@ -351,7 +355,7 @@ onUnmounted(() => {
                         :aria-pressed="isSelectedForecastPoint(point)"
                         :aria-label="forecastTooltip(point)"
                       >
-                        {{ point.uvi }}
+                        {{ formatUvi(point.uvi) }}
                       </button>
                     </div>
                     <div class="hourly-forecast-time">{{ point.time }}</div>

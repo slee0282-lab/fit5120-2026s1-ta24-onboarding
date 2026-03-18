@@ -34,7 +34,7 @@ const displayUv = computed(() =>
       class="uv-circle d-flex flex-column align-items-center justify-content-center rounded-circle"
       :style="category ? { backgroundColor: category.color, color: category.textColor } : {}"
     >
-      <span v-if="uvIndex !== null" class="uv-value fw-bold">{{ uvIndex }}</span>
+      <span v-if="displayUv !== null" class="uv-value fw-bold">{{ displayUv }}</span>
       <span v-else class="uv-value text-muted">--</span>
       <span v-if="category" class="uv-label">{{ category.label }}</span>
     </div>
