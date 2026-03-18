@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import { RouterLink } from 'vue-router'
 import UVCircle from '../components/UVCircle.vue'
 import { useLocationStore } from '../stores/location'
 
 const store = useLocationStore()
+const { uvIndex, locationName } = storeToRefs(store)
 
 const selectedSkinType = ref<1 | 2 | 3 | 4>(2)
 
@@ -25,9 +27,6 @@ function calcSafeMinutes(uvi: number, skinType: 1 | 2 | 3 | 4): number {
   const dThreshold = (burnDose[skinType] ?? 113.20) * KW_TO_W_FACTOR
   return Math.round(dThreshold / iUV43 / 60)
 }
-
-const uvIndex = computed(() => store.uvIndex)
-const locationName = computed(() => store.locationName)
 
 const safeMinutes = computed(() => {
   if (uvIndex.value === null || uvIndex.value === 0) return null
