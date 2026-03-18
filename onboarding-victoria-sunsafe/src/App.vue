@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
 import PasswordGate from './components/PasswordGate.vue'
+import logo from './assets/logo.png'
 
 const authenticated = ref(sessionStorage.getItem('authenticated') === 'true')
 </script>
@@ -12,9 +13,12 @@ const authenticated = ref(sessionStorage.getItem('authenticated') === 'true')
   <template v-else>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container">
-        <RouterLink class="navbar-brand fw-bold" to="/">SunSafe Victoria</RouterLink>
+        <RouterLink class="navbar-brand fw-bold d-inline-flex align-items-center" to="/">
+          <img :src="logo" alt="SunSafe Victoria logo" class="brand-logo me-2" />
+          <span>SunSafe Victoria</span>
+        </RouterLink>
         <button
-          class="navbar-toggler"
+          class="navbar-toggler"x``
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarNav"
@@ -45,5 +49,11 @@ const authenticated = ref(sessionStorage.getItem('authenticated') === 'true')
 .router-link-exact-active {
   color: #fff !important;
   font-weight: 600;
+}
+
+.brand-logo {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
 }
 </style>
