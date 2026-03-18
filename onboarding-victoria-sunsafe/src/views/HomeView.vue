@@ -315,7 +315,8 @@ onUnmounted(() => {
             <div class="mt-3 mb-4">
               <h6 class="text-muted">UV Categories</h6>
               <div class="d-flex gap-2 flex-wrap">
-                <span class="badge" style="background-color: #4caf50">Low (0–2)</span>
+                <span class="badge" style="background-color: #0feb3b; color: #313"
+                  >Low (0–2)</span>
                 <span class="badge" style="background-color: #ffeb3b; color: #333"
                   >Moderate (3–5)</span
                 >
@@ -331,7 +332,7 @@ onUnmounted(() => {
               <div class="card-header fw-semibold">Today’s UV Forecast</div>
               <div class="card-body py-3">
                 <p class="text-muted small mb-3">
-                  Select an hourly UV block to preview it. Click again to return to realtime UV.
+                  Select an hour to preview it. Click again to return to realtime.
                 </p>
                 <div class="hourly-forecast-row">
                   <div v-for="point in hourlyForecast" :key="point.time" class="hourly-forecast-item">
