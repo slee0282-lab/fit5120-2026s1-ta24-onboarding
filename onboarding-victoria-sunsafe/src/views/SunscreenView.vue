@@ -526,7 +526,7 @@ watch(() => store.locationName, () => {
               <!-- Additional protection warning -->
               <div v-if="uvIndex >= 3" class="alert alert-warning small" role="alert">
                 <strong>Additional protection:</strong> Seek shade, wear a broad-brimmed hat,
-                UV-protective sunglasses, and cover-up clothing — especially between 10am and 4pm.
+                UV-protective sunglasses, and cover-up clothing, especially between 10am and 4pm.
               </div>
             </div>
 
