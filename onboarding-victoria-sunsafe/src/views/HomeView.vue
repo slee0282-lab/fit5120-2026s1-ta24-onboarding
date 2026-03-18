@@ -334,10 +334,12 @@ onUnmounted(() => {
   gap: 8px;
   overflow-x: auto;
   padding-bottom: 4px;
+  width: 100%;
 }
 
 .hourly-forecast-item {
   min-width: 30px;
+  flex: 1 1 30px;
   text-align: center;
 }
 
