@@ -72,6 +72,7 @@ function applyResult(data: UVApiResponse, storeQuery: string) {
       time: entry.date.toLocaleTimeString("en-AU", {
         hour: "2-digit",
         minute: "2-digit",
+        hour12: false,
       }),
       uvi: entry.uvi,
     }));
@@ -83,6 +84,7 @@ function applyResult(data: UVApiResponse, storeQuery: string) {
           time: new Date(entry.dt * 1000).toLocaleTimeString("en-AU", {
             hour: "2-digit",
             minute: "2-digit",
+            hour12: false,
           }),
           uvi: entry.uvi,
         }));
@@ -150,6 +152,35 @@ function handleCitySelect() {
 function handleTextSearch() {
   const trimmed = textQuery.value.trim();
   if (trimmed) fetchUVByQuery(trimmed);
+}
+
+function getUvCategory(uvi: number): string {
+  if (uvi < 3) return "Low";
+  if (uvi < 6) return "Moderate";
+  if (uvi < 8) return "High";
+  if (uvi < 11) return "Very High";
+  return "Extreme";
+}
+
+function getUvColor(uvi: number): string {
+  if (uvi < 3) return "#4caf50";
+  if (uvi < 6) return "#ffeb3b";
+  if (uvi < 8) return "#ff9800";
+  if (uvi < 11) return "#f44336";
+  return "#9c27b0";
+}
+
+function getUvTextColor(uvi: number): string {
+  return uvi >= 3 && uvi < 6 ? "#333" : "#fff";
+}
+
+function getUvBlockHeight(uvi: number): string {
+  const clamped = Math.max(0, Math.min(11, uvi));
+  return `${Math.round(20 + clamped * 3.6)}px`;
+}
+
+function forecastTooltip(point: { time: string; uvi: number }): string {
+  return `${point.time} · ${getUvCategory(point.uvi)} · UV ${point.uvi}`;
 }
 
 onUnmounted(() => {
@@ -255,16 +286,28 @@ onUnmounted(() => {
 
             <div v-if="hourlyForecast.length > 0" class="card mb-4">
               <div class="card-header fw-semibold">Today’s UV Forecast</div>
-              <ul class="list-group list-group-flush">
-                <li
-                  v-for="point in hourlyForecast"
-                  :key="point.time"
-                  class="list-group-item d-flex justify-content-between align-items-center"
-                >
-                  <span>{{ point.time }}</span>
-                  <span class="badge text-bg-primary">UV {{ point.uvi }}</span>
-                </li>
-              </ul>
+              <div class="card-body py-3">
+                <div class="hourly-forecast-row">
+                  <div v-for="point in hourlyForecast" :key="point.time" class="hourly-forecast-item">
+                    <div class="hourly-forecast-bar-slot">
+                      <div
+                        class="hourly-forecast-color"
+                        :style="{
+                          backgroundColor: getUvColor(point.uvi),
+                          color: getUvTextColor(point.uvi),
+                          height: getUvBlockHeight(point.uvi),
+                        }"
+                        :title="forecastTooltip(point)"
+                        role="img"
+                        :aria-label="forecastTooltip(point)"
+                      >
+                        {{ point.uvi }}
+                      </div>
+                    </div>
+                    <div class="hourly-forecast-time">{{ point.time }}</div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="d-grid">
@@ -284,3 +327,40 @@ onUnmounted(() => {
     </div>
   </main>
 </template>
+
+<style scoped>
+.hourly-forecast-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.hourly-forecast-item {
+  min-width: 30px;
+  text-align: center;
+}
+
+.hourly-forecast-bar-slot {
+  height: 62px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.hourly-forecast-color {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.hourly-forecast-time {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #6c757d;
+}
+</style>
