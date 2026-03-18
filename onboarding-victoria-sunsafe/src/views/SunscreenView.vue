@@ -171,7 +171,9 @@ watch(() => store.locationName, () => {
           </p>
 
           <div class="d-flex justify-content-center mb-4">
-            <UVCircle :uv-index="uvIndex" />
+            <RouterLink to="/" class="text-decoration-none" aria-label="Back to home">
+              <UVCircle :uv-index="uvIndex" />
+            </RouterLink>
           </div>
 
           <!-- Skin type selector — radio cards with colour swatches -->
