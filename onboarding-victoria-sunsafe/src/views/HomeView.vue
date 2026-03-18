@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onUnmounted } from "vue";
+import { computed, ref, onUnmounted } from "vue";
 import { storeToRefs } from "pinia";
 import { RouterLink } from "vue-router";
 import UVCircle from "../components/UVCircle.vue";
@@ -16,6 +16,8 @@ const textQuery = ref("");
 const selectedCity = ref("");
 const showLocationOptions = ref(true);
 const hourlyForecast = ref<Array<{ time: string; uvi: number }>>([]);
+const asOfTime = computed(() => selectedHourlyTime.value ?? fetchedAt.value);
+const isUsingSelectedHour = computed(() => selectedHourlyTime.value !== null);
 
 interface UVApiResponse {
   uv_index: number;
@@ -295,7 +297,10 @@ onUnmounted(() => {
 
           <template v-else-if="uvIndex !== null">
             <p v-if="locationName" class="text-center text-muted mb-3">
-              {{ locationName }}<span v-if="fetchedAt"> · as of {{ fetchedAt }}</span>
+              {{ locationName }}
+              <span v-if="asOfTime">
+                · as of {{ asOfTime }}<span v-if="isUsingSelectedHour"> (Selected)</span>
+              </span>
             </p>
 
             <div class="d-flex justify-content-center mb-4">
