@@ -174,9 +174,21 @@ function getUvTextColor(uvi: number): string {
   return uvi >= 3 && uvi < 6 ? "#333" : "#fff";
 }
 
-function getUvBlockHeight(uvi: number): string {
+function getUvBlockHeightPx(uvi: number): number {
   const clamped = Math.max(0, Math.min(11, uvi));
-  return `${Math.round(20 + clamped * 3.6)}px`;
+  return Math.round(20 + clamped * 3.6);
+}
+
+function getUvBlockHeight(uvi: number): string {
+  return `${getUvBlockHeightPx(uvi)}px`;
+}
+
+function getForecastSlotHeight(): string {
+  const tallest = hourlyForecast.value.reduce(
+    (maxHeight, point) => Math.max(maxHeight, getUvBlockHeightPx(point.uvi)),
+    20
+  );
+  return `${tallest + 6}px`;
 }
 
 function forecastTooltip(point: { time: string; uvi: number }): string {
@@ -289,7 +301,7 @@ onUnmounted(() => {
               <div class="card-body py-3">
                 <div class="hourly-forecast-row">
                   <div v-for="point in hourlyForecast" :key="point.time" class="hourly-forecast-item">
-                    <div class="hourly-forecast-bar-slot">
+                    <div class="hourly-forecast-bar-slot" :style="{ height: getForecastSlotHeight() }">
                       <div
                         class="hourly-forecast-color"
                         :style="{
@@ -331,7 +343,7 @@ onUnmounted(() => {
 <style scoped>
 .hourly-forecast-row {
   display: flex;
-  gap: 8px;
+  gap: 3px;
   overflow-x: auto;
   padding-bottom: 4px;
   width: 100%;
@@ -344,7 +356,6 @@ onUnmounted(() => {
 }
 
 .hourly-forecast-bar-slot {
-  height: 62px;
   display: flex;
   align-items: flex-end;
 }
