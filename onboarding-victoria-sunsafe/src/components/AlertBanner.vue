@@ -24,7 +24,7 @@ function getAlert(uv: number): AlertLevel {
       show: true,
       variant: 'warning',
       message: `UV Index ${uv} — Moderate`,
-      action: 'Wear sunscreen SPF 30+ and a hat if outside for extended periods.',
+      action: 'Apply SPF 30+ sunscreen to exposed skin, and a hat if outside for extended periods.',
     }
   }
   if (uv < 8) {

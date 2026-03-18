@@ -6,7 +6,7 @@ import UVCircle from '../components/UVCircle.vue'
 import { useLocationStore } from '../stores/location'
 
 const store = useLocationStore()
-const { uvIndex, locationName } = storeToRefs(store)
+const { uvIndex, locationName, selectedHourlyTime, fetchedAt } = storeToRefs(store)
 
 const selectedSkinType = ref<1 | 2 | 3 | 4>(2)
 
@@ -164,7 +164,11 @@ watch(() => store.locationName, () => {
         </template>
 
         <template v-else>
-          <p v-if="locationName" class="text-center text-muted mb-2">{{ locationName }}</p>
+          <p v-if="locationName" class="text-center text-muted mb-2">
+            {{ locationName }}
+            <span v-if="selectedHourlyTime"> · {{ selectedHourlyTime }} (Selected)</span>
+            <span v-else-if="fetchedAt"> · as of {{ fetchedAt }}</span>
+          </p>
 
           <div class="d-flex justify-content-center mb-4">
             <UVCircle :uv-index="uvIndex" />
