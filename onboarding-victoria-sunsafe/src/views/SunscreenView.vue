@@ -481,7 +481,7 @@ watch(() => store.locationName, () => {
                 </div>
               </div>
               <p class="text-muted mt-2" style="font-size: 11px">
-                © Cancer Council NSW (CCNSW). All rights reserved.
+                Source: Sunscreen recommendations by © Cancer Council NSW (CCNSW). All rights reserved.
                 "The average adult needs about 35 mL (around 7 teaspoons) for full-body coverage –
                 at least one teaspoon each for your arms, legs, front, back, face/neck/ears."
                 Reproduced for non-commercial educational purposes.
@@ -516,7 +516,7 @@ watch(() => store.locationName, () => {
                 </ul>
               </div>
               <p v-if="spf" class="text-muted mb-4" style="font-size: 11px">
-                © Cancer Council NSW (CCNSW). All rights reserved.
+                Source: Sunscreen recommendations by © Cancer Council NSW (CCNSW). All rights reserved.
                 SPF guidance sourced from Cancer Council NSW (CCNSW)'s SunSmart sun protection guidelines,
                 reproduced for non-commercial educational purposes.
                 <a href="https://www.cancer.org.au" target="_blank" rel="noopener">cancer.org.au</a>
