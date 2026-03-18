@@ -22,6 +22,7 @@ interface ZipResult {
 
 interface UVResponse {
   current?: { uvi?: number }
+  hourly?: Array<{ dt: number; uvi?: number }>
 }
 
 function uvCategory(uv: number): string {
@@ -113,7 +114,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const uvParams = new URLSearchParams({
     lat: String(lat),
     lon: String(lon),
-    exclude: 'minutely,hourly,daily,alerts',
+    exclude: 'minutely,daily,alerts',
     appid: apiKey,
   })
   const uvRes = await fetch(`https://api.openweathermap.org/data/3.0/onecall?${uvParams}`)
@@ -136,10 +137,18 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   }
 
   const uv = Number(uvRaw)
+  const hourlyForecast = (uvData.hourly ?? [])
+    .filter((entry) => typeof entry.dt === 'number' && entry.uvi != null)
+    .slice(0, 24)
+    .map((entry) => ({
+      dt: entry.dt,
+      uvi: Math.round(Number(entry.uvi) * 10) / 10,
+    }))
 
   return Response.json({
     uv_index: Math.round(uv * 10) / 10,
     uv_category: uvCategory(uv),
     location: locationName,
+    hourly_forecast: hourlyForecast,
   })
 }
