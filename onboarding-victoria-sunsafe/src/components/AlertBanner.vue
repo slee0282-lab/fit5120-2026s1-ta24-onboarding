@@ -11,26 +11,31 @@ interface AlertLevel {
 }
 
 function getAlert(uv: number): AlertLevel {
-  if (uv <= 2) {
-    return { show: false, variant: 'success', message: '', action: '' }
+  if (uv < 3) {
+    return {
+      show: true,
+      variant: 'success',
+      message: `UV Index ${uv} — Low`,
+      action: 'It is still recommended to wear sunscreen if outside for extended periods, though not necessary.',
+    }
   }
-  if (uv <= 5) {
+  if (uv < 6) {
     return {
       show: true,
       variant: 'warning',
       message: `UV Index ${uv} — Moderate`,
-      action: 'Wear sunscreen SPF 30+ and a hat if outside for extended periods.',
+      action: 'Apply SPF 30+ sunscreen to exposed skin, and a hat if outside for extended periods.',
     }
   }
-  if (uv <= 7) {
+  if (uv < 8) {
     return {
       show: true,
       variant: 'warning',
       message: `UV Index ${uv} — High`,
-      action: 'Apply SPF 50+ sunscreen, wear protective clothing and seek shade between 10am–4pm.',
+      action: 'Apply SPF 50+ sunscreen, wear protective clothing and seek shade at peak hours.',
     }
   }
-  if (uv <= 10) {
+  if (uv < 11) {
     return {
       show: true,
       variant: 'danger',
@@ -64,3 +69,13 @@ const alert = computed(() =>
     <p class="mb-0 mt-1">{{ alert.action }}</p>
   </div>
 </template>
+
+<style scoped>
+.alert {
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: 16px;
+}
+</style>

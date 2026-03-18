@@ -1,21 +1,27 @@
 <script setup lang="ts">
-import { ref, onUnmounted } from "vue";
+import { computed, ref, onUnmounted } from "vue";
+import { storeToRefs } from "pinia";
 import { RouterLink } from "vue-router";
 import UVCircle from "../components/UVCircle.vue";
 import AlertBanner from "../components/AlertBanner.vue";
-import { useLocationStore } from "../stores/location";
+import { useLocationStore, type HourlyForecastPoint } from "../stores/location";
 
 const store = useLocationStore();
-
-const uvIndex = ref<number | null>(null);
-const locationName = ref<string | null>(null);
-const fetchedAt = ref<string | null>(null);
+const {
+  uvIndex,
+  locationName,
+  selectedHourlyUvIndex,
+  selectedHourlyTime,
+  fetchedAt,
+  hourlyForecast,
+} = storeToRefs(store);
 const errorMessage = ref<string | null>(null);
 const loading = ref(false);
 const textQuery = ref("");
 const selectedCity = ref("");
-const showLocationOptions = ref(true);
-const hourlyForecast = ref<Array<{ time: string; uvi: number }>>([]);
+const showLocationOptions = ref(locationName.value === null);
+const asOfTime = computed(() => selectedHourlyTime.value ?? fetchedAt.value);
+const isUsingSelectedHour = computed(() => selectedHourlyTime.value !== null);
 
 interface UVApiResponse {
   uv_index: number;
@@ -50,9 +56,7 @@ function startRefresh(fn: () => void) {
 }
 
 function applyResult(data: UVApiResponse, storeQuery: string) {
-  uvIndex.value = data.uv_index;
-  locationName.value = data.location;
-  fetchedAt.value = new Date().toLocaleTimeString("en-AU", {
+  const fetchedTime = new Date().toLocaleTimeString("en-AU", {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -78,7 +82,7 @@ function applyResult(data: UVApiResponse, storeQuery: string) {
       uvi: entry.uvi,
     }));
 
-  hourlyForecast.value =
+  const forecast: HourlyForecastPoint[] =
     sameDayForecast.length > 0
       ? sameDayForecast
       : (data.hourly_forecast ?? []).slice(0, 8).map((entry) => ({
@@ -90,14 +94,11 @@ function applyResult(data: UVApiResponse, storeQuery: string) {
           uvi: entry.uvi,
         }));
 
+  store.setForecastData(fetchedTime, forecast);
   store.setLocation(storeQuery, data.uv_index, data.location);
 }
 
 function clearResult() {
-  uvIndex.value = null;
-  locationName.value = null;
-  fetchedAt.value = null;
-  hourlyForecast.value = [];
   store.clear();
 }
 
@@ -202,6 +203,17 @@ function forecastTooltip(point: { time: string; uvi: number }): string {
   return `${point.time} · ${getUvCategory(point.uvi)} · UV ${point.uvi}`;
 }
 
+function isSelectedForecastPoint(point: { time: string; uvi: number }): boolean {
+  return (
+    selectedHourlyTime.value === point.time &&
+    selectedHourlyUvIndex.value === point.uvi
+  );
+}
+
+function toggleForecastPoint(point: { time: string; uvi: number }) {
+  store.toggleHourlyUv(point.uvi, point.time);
+}
+
 onUnmounted(() => {
   if (refreshTimer !== null) clearInterval(refreshTimer);
 });
@@ -288,7 +300,10 @@ onUnmounted(() => {
 
           <template v-else-if="uvIndex !== null">
             <p v-if="locationName" class="text-center text-muted mb-3">
-              {{ locationName }}<span v-if="fetchedAt"> · as of {{ fetchedAt }}</span>
+              {{ locationName }}
+              <span v-if="asOfTime">
+                · as of {{ asOfTime }}<span v-if="isUsingSelectedHour"> (Selected)</span>
+              </span>
             </p>
 
             <div class="d-flex justify-content-center mb-4">
@@ -300,7 +315,8 @@ onUnmounted(() => {
             <div class="mt-3 mb-4">
               <h6 class="text-muted">UV Categories</h6>
               <div class="d-flex gap-2 flex-wrap">
-                <span class="badge" style="background-color: #4caf50">Low (0–2)</span>
+                <span class="badge" style="background-color: #0feb3b; color: #313"
+                  >Low (0–2)</span>
                 <span class="badge" style="background-color: #ffeb3b; color: #333"
                   >Moderate (3–5)</span
                 >
@@ -315,22 +331,28 @@ onUnmounted(() => {
             <div v-if="hourlyForecast.length > 0" class="card mb-4">
               <div class="card-header fw-semibold">Today’s UV Forecast</div>
               <div class="card-body py-3">
+                <p class="text-muted small mb-3">
+                  Select an hour to preview it. Click again to return to realtime.
+                </p>
                 <div class="hourly-forecast-row">
                   <div v-for="point in hourlyForecast" :key="point.time" class="hourly-forecast-item">
                     <div class="hourly-forecast-bar-slot" :style="{ height: getForecastSlotHeight() }">
-                      <div
+                      <button
+                        type="button"
                         class="hourly-forecast-color"
+                        :class="{ 'hourly-forecast-color--selected': isSelectedForecastPoint(point) }"
                         :style="{
                           backgroundColor: getUvColor(point.uvi),
                           color: getUvTextColor(point.uvi),
                           height: getUvBlockHeight(point.uvi),
                         }"
+                        @click="toggleForecastPoint(point)"
                         :title="forecastTooltip(point)"
-                        role="img"
+                        :aria-pressed="isSelectedForecastPoint(point)"
                         :aria-label="forecastTooltip(point)"
                       >
                         {{ point.uvi }}
-                      </div>
+                      </button>
                     </div>
                     <div class="hourly-forecast-time">{{ point.time }}</div>
                   </div>
@@ -385,6 +407,16 @@ onUnmounted(() => {
   border: 1px solid rgba(0, 0, 0, 0.12);
   font-size: 13px;
   font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.hourly-forecast-color:hover {
+  transform: translateY(-1px);
+}
+
+.hourly-forecast-color--selected {
+  box-shadow: 0 0 0 2px var(--bs-primary);
 }
 
 .hourly-forecast-time {
