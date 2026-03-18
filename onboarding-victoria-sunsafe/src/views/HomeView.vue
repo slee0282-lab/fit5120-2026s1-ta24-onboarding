@@ -162,6 +162,42 @@ function handleTextSearch() {
   }
 }
 
+function handleUserLiveLocation() {
+  if (!("geolocation" in navigator)) {
+    errorMessage.value = "Geolocation is not supported in this browser.";
+    return;
+  }
+
+  loading.value = true;
+  errorMessage.value = null;
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      showLocationOptions.value = false;
+      fetchUVByCoords(
+        position.coords.latitude,
+        position.coords.longitude,
+        "Your location"
+      );
+    },
+    (error) => {
+      loading.value = false;
+      if (error.code === error.PERMISSION_DENIED) {
+        errorMessage.value = "Location permission was denied.";
+      } else if (error.code === error.TIMEOUT) {
+        errorMessage.value = "Location request timed out. Please try again.";
+      } else {
+        errorMessage.value = "Unable to retrieve your location.";
+      }
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 60000,
+    }
+  );
+}
+
 function getUvCategory(uvi: number): string {
   if (uvi < 3) return "Low";
   if (uvi < 6) return "Moderate";
@@ -233,11 +269,22 @@ onUnmounted(() => {
         </p>
 
         <div v-if="showLocationOptions" class="card mb-4">
+          <div class="card-body border-bottom">
+            <button
+              type="button"
+              class="btn btn-primary"
+              @click="handleUserLiveLocation"
+              :disabled="loading"
+            >
+              Use my location
+            </button>
+          </div>
+
           <!-- City dropdown -->
           <div
             class="card-body border-bottom d-flex align-items-center justify-content-between gap-3 flex-wrap"
           >
-            <div class="fw-semibold">Select a city</div>
+            <div class="fw-semibold ms-2">Or select a city</div>
             <select
               v-model="selectedCity"
               class="form-select"
@@ -258,8 +305,8 @@ onUnmounted(() => {
 
           <!-- Text input -->
           <div class="card-body">
-            <div class="fw-semibold mb-2">Or type suburb / postcode</div>
-            <form class="d-flex gap-2" @submit.prevent="handleTextSearch">
+            <div class="fw-semibold mb-2 ms-2">Or type a suburb/postcode</div>
+            <form class="d-flex gap-2 mt-3" @submit.prevent="handleTextSearch">
               <input
                 v-model="textQuery"
                 type="text"
