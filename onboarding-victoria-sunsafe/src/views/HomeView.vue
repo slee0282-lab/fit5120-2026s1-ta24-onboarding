@@ -4,18 +4,22 @@ import { storeToRefs } from "pinia";
 import { RouterLink } from "vue-router";
 import UVCircle from "../components/UVCircle.vue";
 import AlertBanner from "../components/AlertBanner.vue";
-import { useLocationStore } from "../stores/location";
+import { useLocationStore, type HourlyForecastPoint } from "../stores/location";
 
 const store = useLocationStore();
-const { uvIndex, locationName, selectedHourlyUvIndex, selectedHourlyTime } =
-  storeToRefs(store);
-const fetchedAt = ref<string | null>(null);
+const {
+  uvIndex,
+  locationName,
+  selectedHourlyUvIndex,
+  selectedHourlyTime,
+  fetchedAt,
+  hourlyForecast,
+} = storeToRefs(store);
 const errorMessage = ref<string | null>(null);
 const loading = ref(false);
 const textQuery = ref("");
 const selectedCity = ref("");
-const showLocationOptions = ref(true);
-const hourlyForecast = ref<Array<{ time: string; uvi: number }>>([]);
+const showLocationOptions = ref(locationName.value === null);
 const asOfTime = computed(() => selectedHourlyTime.value ?? fetchedAt.value);
 const isUsingSelectedHour = computed(() => selectedHourlyTime.value !== null);
 
@@ -52,7 +56,7 @@ function startRefresh(fn: () => void) {
 }
 
 function applyResult(data: UVApiResponse, storeQuery: string) {
-  fetchedAt.value = new Date().toLocaleTimeString("en-AU", {
+  const fetchedTime = new Date().toLocaleTimeString("en-AU", {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -78,7 +82,7 @@ function applyResult(data: UVApiResponse, storeQuery: string) {
       uvi: entry.uvi,
     }));
 
-  hourlyForecast.value =
+  const forecast: HourlyForecastPoint[] =
     sameDayForecast.length > 0
       ? sameDayForecast
       : (data.hourly_forecast ?? []).slice(0, 8).map((entry) => ({
@@ -90,12 +94,11 @@ function applyResult(data: UVApiResponse, storeQuery: string) {
           uvi: entry.uvi,
         }));
 
+  store.setForecastData(fetchedTime, forecast);
   store.setLocation(storeQuery, data.uv_index, data.location);
 }
 
 function clearResult() {
-  fetchedAt.value = null;
-  hourlyForecast.value = [];
   store.clear();
 }
 
