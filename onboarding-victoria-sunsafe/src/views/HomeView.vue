@@ -123,7 +123,7 @@ async function fetchUVByQuery(query: string) {
   }
 }
 
-async function fetchUVByCoords(lat: number, lon: number, name: string) {
+async function fetchUVByCoords(lat: number, lon: number) {
   loading.value = true;
   errorMessage.value = null;
   try {
@@ -136,8 +136,8 @@ async function fetchUVByCoords(lat: number, lon: number, name: string) {
       clearResult();
       return;
     }
-    applyResult({ ...data, location: name }, name);
-    startRefresh(() => fetchUVByCoords(lat, lon, name));
+    applyResult(data, data.location);
+    startRefresh(() => fetchUVByCoords(lat, lon));
   } catch {
     errorMessage.value = "UV data is currently unavailable. Please try again later.";
     clearResult();
@@ -150,7 +150,7 @@ function handleCitySelect() {
   const city = VICTORIA_CITIES.find((c) => c.label === selectedCity.value);
   if (city) {
     showLocationOptions.value = false;
-    fetchUVByCoords(city.lat, city.lon, `${city.label}, VIC`);
+    fetchUVByCoords(city.lat, city.lon);
   }
 }
 
@@ -160,6 +160,41 @@ function handleTextSearch() {
     showLocationOptions.value = false;
     fetchUVByQuery(trimmed);
   }
+}
+
+function handleUserLiveLocation() {
+  if (!("geolocation" in navigator)) {
+    errorMessage.value = "Geolocation is not supported in this browser.";
+    return;
+  }
+
+  loading.value = true;
+  errorMessage.value = null;
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      showLocationOptions.value = false;
+      fetchUVByCoords(
+        position.coords.latitude,
+        position.coords.longitude
+      );
+    },
+    (error) => {
+      loading.value = false;
+      if (error.code === error.PERMISSION_DENIED) {
+        errorMessage.value = "Location permission was denied.";
+      } else if (error.code === error.TIMEOUT) {
+        errorMessage.value = "Location request timed out. Please try again.";
+      } else {
+        errorMessage.value = "Unable to retrieve your location.";
+      }
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 60000,
+    }
+  );
 }
 
 function getUvCategory(uvi: number): string {
@@ -233,11 +268,22 @@ onUnmounted(() => {
         </p>
 
         <div v-if="showLocationOptions" class="card mb-4">
+          <div class="card-body border-bottom">
+            <button
+              type="button"
+              class="btn btn-primary"
+              @click="handleUserLiveLocation"
+              :disabled="loading"
+            >
+              Use my location
+            </button>
+          </div>
+
           <!-- City dropdown -->
           <div
             class="card-body border-bottom d-flex align-items-center justify-content-between gap-3 flex-wrap"
           >
-            <div class="fw-semibold">Select a city</div>
+            <div class="fw-semibold ms-2">Or select a city</div>
             <select
               v-model="selectedCity"
               class="form-select"
@@ -258,8 +304,8 @@ onUnmounted(() => {
 
           <!-- Text input -->
           <div class="card-body">
-            <div class="fw-semibold mb-2">Or type suburb / postcode</div>
-            <form class="d-flex gap-2" @submit.prevent="handleTextSearch">
+            <div class="fw-semibold mb-2 ms-2">Or type a suburb/postcode</div>
+            <form class="d-flex gap-2 mt-3" @submit.prevent="handleTextSearch">
               <input
                 v-model="textQuery"
                 type="text"
