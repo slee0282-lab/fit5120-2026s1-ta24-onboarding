@@ -6,9 +6,7 @@ import UVCircle from '../components/UVCircle.vue'
 import { useLocationStore } from '../stores/location'
 
 const store = useLocationStore()
-const { uvIndex, locationName, selectedHourlyTime, fetchedAt } = storeToRefs(store)
-
-const selectedSkinType = ref<1 | 2 | 3 | 4>(2)
+const { uvIndex, locationName, selectedHourlyTime, fetchedAt, selectedSkinType } = storeToRefs(store)
 
 const skinTypes = [
   { value: 1 as const, label: 'Type I',   detail: 'Always burns, never tans',     color: '#FBEAC8' },

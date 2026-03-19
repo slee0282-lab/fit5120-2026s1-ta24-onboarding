@@ -15,6 +15,7 @@ export const useLocationStore = defineStore('location', () => {
   const locationName = ref<string | null>(null)
   const fetchedAt = ref<string | null>(null)
   const hourlyForecast = ref<HourlyForecastPoint[]>([])
+  const selectedSkinType = ref<1 | 2 | 3 | 4>(2)
 
   function setLocation(q: string, uv: number, name: string) {
     query.value = q
@@ -62,6 +63,7 @@ export const useLocationStore = defineStore('location', () => {
     locationName,
     fetchedAt,
     hourlyForecast,
+    selectedSkinType,
     setLocation,
     setForecastData,
     toggleHourlyUv,
