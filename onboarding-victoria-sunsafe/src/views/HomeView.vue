@@ -399,9 +399,9 @@ onUnmounted(() => {
               </span>
             </p>
 
-            <div class="d-flex justify-content-center mb-4">
+            <RouterLink to="/sunscreen" class="d-flex justify-content-center mb-4" style="text-decoration: none;">
               <UVCircle :uv-index="uvIndex" />
-            </div>
+            </RouterLink>
 
             <AlertBanner :uv-index="uvIndex" />
 
@@ -457,7 +457,7 @@ onUnmounted(() => {
                 <strong>Peak UV hours today: {{ peakHoursSummary }}</strong>
               </p>
               <p class="mb-0 mt-1 small">
-                Avoiding sun exposure during these times is recommended, especially if UV is Moderate or higher.
+                Avoiding sun exposure during these times is recommended.
               </p>
             </div>
 
