@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// No reactive logic needed for this presentational component
+import { RouterLink } from "vue-router";
 </script>
 
 <template>
@@ -10,17 +10,19 @@
         Protect your skin from the invisible dangers of UV. Get real-time UV index forecasts 
         and expert sunscreen guidance for Victoria.
       </p>
+      <RouterLink to="/uv-index" class="btn start-now-btn">Check UV Index</RouterLink>
     </div>
   </div>
 </template>
 
 <style scoped>
 .value-proposition-banner {
-  background: linear-gradient(135deg, #ce5f04 0%, #e9ab47 25%, #e4c135 50%, #ebc443 75%, #e97527 100%);
+  background: linear-gradient(135deg, #c25903 0%, #e9ab47 25%, #fcd745 50%, #ebc443 75%, #e06b1d 100%);
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
   padding: 60px 20px;
-  margin-bottom: 30px;
+  margin-top: 14px;
+  margin-bottom: 4px;
   border-radius: 8px;
   position: relative;
   overflow: hidden;
@@ -66,6 +68,25 @@
   opacity: 0.95;
 }
 
+.start-now-btn {
+  margin-top: 1rem;
+  font-weight: 600;
+  font-size: 1.2rem;
+  padding: 0.5rem 0.9rem;
+  background: linear-gradient(135deg, #e09e23 0%, #e67137 50%, #df4a24 100%);
+  background-size: 200% 200%;
+  animation: gradientShift 6s ease infinite;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #fff;
+}
+
+.start-now-btn:hover,
+.start-now-btn:focus {
+  background-position: 100% 50%;
+  border-color: rgba(0, 0, 0, 0.15);
+  color: #fff;
+}
+
 @keyframes gradientShift {
   0% {
     background-position: 0% 50%;
@@ -82,7 +103,7 @@
 @media (max-width: 768px) {
   .value-proposition-banner {
     padding: 40px 20px;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
   }
 
   .banner-title {
@@ -97,7 +118,7 @@
 @media (max-width: 576px) {
   .value-proposition-banner {
     padding: 30px 15px;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
   }
 
   .banner-title {

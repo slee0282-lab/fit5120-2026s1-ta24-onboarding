@@ -159,7 +159,7 @@ watch(() => store.locationName, () => {
             <p class="text-muted mb-3">
               Please check your UV Index first so we can personalise the guide for you.
             </p>
-            <RouterLink to="/" class="btn btn-primary">← Check UV Index</RouterLink>
+            <RouterLink to="/uv-index" class="btn btn-primary">← Check UV Index</RouterLink>
           </div>
         </template>
 
@@ -171,7 +171,7 @@ watch(() => store.locationName, () => {
           </p>
 
           <div class="d-flex justify-content-center mb-4">
-            <RouterLink to="/" class="text-decoration-none" aria-label="Back to home">
+            <RouterLink to="/uv-index" class="text-decoration-none" aria-label="Back to home">
               <UVCircle :uv-index="uvIndex" />
             </RouterLink>
           </div>
