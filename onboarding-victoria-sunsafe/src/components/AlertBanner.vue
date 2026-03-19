@@ -66,8 +66,8 @@ const alert = computed(() =>
     :class="`alert-${alert.variant}`"
     role="alert"
   >
-    <strong>{{ alert.message }}</strong>
-    <p class="mb-0 mt-1">{{ alert.action }}</p>
+    <strong class="small">{{ alert.message }}</strong>
+    <p class="mb-0 mt-1 small">{{ alert.action }}</p>
   </div>
 </template>
 
