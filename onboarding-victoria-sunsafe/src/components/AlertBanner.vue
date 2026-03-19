@@ -73,7 +73,7 @@ const alert = computed(() =>
 
 <style scoped>
 .alert {
-  min-height: 120px;
+  min-height: 110px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;

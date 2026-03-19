@@ -230,6 +230,49 @@ function formatUvi(uvi: number): string {
   return uvi.toFixed(1);
 }
 
+const peakHoursSummary = computed(() => {
+  const points = hourlyForecast.value;
+  if (points.length === 0) return null;
+
+  const thresholdUvi = 3;
+  const peakIndices = points
+    .map((point, index) => (point.uvi >= thresholdUvi ? index : -1))
+    .filter((index) => index !== -1);
+
+  const firstPeakIndex = peakIndices[0];
+  if (firstPeakIndex === undefined) return null;
+
+  const ranges: Array<{ start: number; end: number }> = [];
+  let start = firstPeakIndex;
+  let end = firstPeakIndex;
+
+  for (let i = 1; i < peakIndices.length; i += 1) {
+    const current = peakIndices[i];
+    if (current === undefined) continue;
+
+    if (current === end + 1) {
+      end = current;
+    } else {
+      ranges.push({ start, end });
+      start = current;
+      end = current;
+    }
+  }
+  ranges.push({ start, end });
+
+  const formattedRanges = ranges.map((range) => {
+    const startTime = points[range.start]?.time;
+    const endTime = points[range.end]?.time;
+    if (!startTime || !endTime) return null;
+
+    return startTime === endTime ? startTime : `${startTime} - ${endTime}`;
+  }).filter((value): value is string => value !== null);
+
+  if (formattedRanges.length === 0) return null;
+
+  return `${formattedRanges.join(", ")}`;
+});
+
 function getForecastSlotHeight(): string {
   const tallest = hourlyForecast.value.reduce(
     (maxHeight, point) => Math.max(maxHeight, getUvBlockHeightPx(point.uvi)),
@@ -407,6 +450,15 @@ onUnmounted(() => {
                   Select an hour to preview it. Click again to return to realtime.
                 </p>
               </div>
+            </div>
+
+            <div v-if="hourlyForecast.length > 0 && peakHoursSummary" class="alert alert-info mb-4" role="alert">
+              <p class="mb-0 small">
+                <strong>Peak UV hours today: {{ peakHoursSummary }}</strong>
+              </p>
+              <p class="mb-0 mt-1 small">
+                Avoiding sun exposure during these times is recommended, especially if UV is Moderate or higher.
+              </p>
             </div>
 
             <div class="d-grid">
