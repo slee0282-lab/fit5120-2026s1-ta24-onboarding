@@ -363,7 +363,6 @@ onUnmounted(() => {
             <AlertBanner :uv-index="uvIndex" />
 
             <div class="mt-3 mb-4">
-              <h6 class="text-muted">UV Categories</h6>
               <div class="d-flex gap-2 flex-wrap">
                 <span class="badge" style="background-color: #0feb3b; color: #313"
                   >Low (0–2)</span>
