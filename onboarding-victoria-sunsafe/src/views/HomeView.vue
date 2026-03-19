@@ -381,9 +381,6 @@ onUnmounted(() => {
             <div v-if="hourlyForecast.length > 0" class="card mb-4">
               <div class="card-header fw-semibold">Today’s UV Forecast</div>
               <div class="card-body py-3">
-                <p class="text-muted small mb-3">
-                  Select an hour to preview it. Click again to return to realtime.
-                </p>
                 <div class="hourly-forecast-row">
                   <div v-for="point in hourlyForecast" :key="point.time" class="hourly-forecast-item">
                     <div class="hourly-forecast-bar-slot" :style="{ height: getForecastSlotHeight() }">
@@ -407,6 +404,9 @@ onUnmounted(() => {
                     <div class="hourly-forecast-time">{{ point.time }}</div>
                   </div>
                 </div>
+                <p class="text-muted small mt-2 mb-0">
+                  Select an hour to preview it. Click again to return to realtime.
+                </p>
               </div>
             </div>
 
