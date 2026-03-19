@@ -123,7 +123,7 @@ async function fetchUVByQuery(query: string) {
   }
 }
 
-async function fetchUVByCoords(lat: number, lon: number, name: string) {
+async function fetchUVByCoords(lat: number, lon: number) {
   loading.value = true;
   errorMessage.value = null;
   try {
@@ -136,8 +136,8 @@ async function fetchUVByCoords(lat: number, lon: number, name: string) {
       clearResult();
       return;
     }
-    applyResult({ ...data, location: name }, name);
-    startRefresh(() => fetchUVByCoords(lat, lon, name));
+    applyResult(data, data.location);
+    startRefresh(() => fetchUVByCoords(lat, lon));
   } catch {
     errorMessage.value = "UV data is currently unavailable. Please try again later.";
     clearResult();
@@ -150,7 +150,7 @@ function handleCitySelect() {
   const city = VICTORIA_CITIES.find((c) => c.label === selectedCity.value);
   if (city) {
     showLocationOptions.value = false;
-    fetchUVByCoords(city.lat, city.lon, `${city.label}, VIC`);
+    fetchUVByCoords(city.lat, city.lon);
   }
 }
 
@@ -176,8 +176,7 @@ function handleUserLiveLocation() {
       showLocationOptions.value = false;
       fetchUVByCoords(
         position.coords.latitude,
-        position.coords.longitude,
-        "Your location"
+        position.coords.longitude
       );
     },
     (error) => {
