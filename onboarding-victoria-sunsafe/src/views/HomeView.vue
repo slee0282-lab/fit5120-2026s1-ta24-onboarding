@@ -2,6 +2,7 @@
 import { computed, ref, onUnmounted } from "vue";
 import { storeToRefs } from "pinia";
 import { RouterLink } from "vue-router";
+import ValuePropositionBanner from "../components/ValuePropositionBanner.vue";
 import UVCircle from "../components/UVCircle.vue";
 import AlertBanner from "../components/AlertBanner.vue";
 import { useLocationStore, type HourlyForecastPoint } from "../stores/location";
@@ -303,6 +304,8 @@ onUnmounted(() => {
 
 <template>
   <main class="container py-4">
+    <ValuePropositionBanner />
+    
     <div class="row justify-content-center">
       <div class="col-12 col-md-8 col-lg-6">
         <h1 class="mb-1">UV Index</h1>
