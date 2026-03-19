@@ -11,7 +11,7 @@ const authenticated = ref(sessionStorage.getItem('authenticated') === 'true')
   <PasswordGate v-if="!authenticated" @authenticated="authenticated = true" />
 
   <template v-else>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
       <div class="container">
         <RouterLink class="navbar-brand fw-bold d-inline-flex align-items-center" to="/">
           <img :src="logo" alt="SunSafe Victoria logo" class="brand-logo me-2" />
